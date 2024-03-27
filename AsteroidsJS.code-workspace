@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../ChopperJS"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "AsteroidsJS"
+	}
+}
