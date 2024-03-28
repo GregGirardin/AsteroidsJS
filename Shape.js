@@ -64,11 +64,10 @@ export class Line
 
   translate( p, theta )
   {
-    p1r = this.p1.translate( p, theta );
-    p2r = this.p2.translate( p, theta );
+    let p1r = this.p1.translate( p, theta );
+    let p2r = this.p2.translate( p, theta );
     return new Line( p1r, p2r, this.color );
   }
-
 }
 
 //  a shape is an array of lines, a line is an array of [x,y position, and a rotational angle
@@ -96,18 +95,18 @@ export class Shape
     return tlines;
   }
 
-  draw( ctx, p, a, color, width )
+  draw( ctx, p, a, color="black", width=1 )
   {
-    tlines = this.translate( p, a )
+    let tlines = this.translate( p, a )
     ctx.strokeStyle = 'black';
-    for( line in tlines )
+
+    for( let line of tlines )
     {
       ctx.beginPath();
       ctx.moveTo( line.p1.x, line.p1.y );
       ctx.lineTo( line.p2.x, line.p2.y );
       ctx.stroke();
     }
-
   }
 
   move( v )

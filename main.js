@@ -181,10 +181,19 @@ while True:
 
 import { c } from './constants.js';
 import { Ship } from './Ship.js';
+import { Vector } from './Vector.js';
+import { CollisionObject, gameEvents } from './Utils.js';
+import { Asteroid, newAsteroid, Blackhole, newBlackhole } from './Asteroid.js';
 
 window.onload = gameInit;
 
-
+/*
+const sList = [ [ 1000, 5000, -1, 2000, newBlackHole ],
+                [ 1200, 2000, -1, 1200, newTanker ],
+                [  150,  220,  0,    0, newAsteroid ],
+                [  200,  300,  0,  500, newBigAlien ],
+                [  200,  300,  0, 1000, newSmallAlien ] ];
+*/
 class gameEngine
 {
   constructor()
@@ -196,10 +205,10 @@ class gameEngine
     this.canvas.height = c.SCREEN_HEIGHT;
 
     this.highScore = 0;
-    //this.events = new gameEvents();
+    this.events = new gameEvents();
     this.gameOn = false;
     this.newGame();
-    // this.spawn =
+    // this.spawn = new spawnList( sList );
   }
 
   newGame()
@@ -223,13 +232,13 @@ class gameEngine
     if( this.score > this.highScore )
       this.highScore = this.score;
     this.newGame();
-    this.s = undefined;
+    this.ship = undefined;
   }
 
   addObj( obj )
   {
     // a little hack to put the ship at the head of the list since we search for it often
-    if( obj. type == c.OBJECT_TYPE_SHIP )
+    if( obj.type == c.OBJECT_TYPE_SHIP )
       this.objects.unshift( obj );
     else
       this.objects.push( obj );
@@ -240,27 +249,44 @@ class gameEngine
     switch( param.key )
     {
       case "ArrowLeft":
-        if( this.s.spin < 0 )
-          this.s.spin = 0;
-        else if( this.s.spin < c.MAX_SPIN )
-          this.s.spin += c.SPIN_DELTA;
+        if( this.ship.spin < 0 )
+          this.ship.spin = 0;
+        else if( this.ship.spin < c.MAX_SPIN )
+          this.ship.spin += c.SPIN_DELTA;
         break;
+
       case "ArrowRight":
-        if( this.s.spin > 0 )
-          this.s.spin = 0;
-        else if( this.s.spin > -1 * c.MAX_SPIN )
-          this.s.spin -= c.SPIN_DELTA;
+        if( this.ship.spin > 0 )
+          this.ship.spin = 0;
+        else if( this.ship.spin > -1 * c.MAX_SPIN )
+          this.ship.spin -= c.SPIN_DELTA;
         break;
+
       case "ArrowUp":
-        this.s.accel += .03;
+        this.ship.accel += .03;
         break;
+
       case "ArrowDown":
-        this.s.accel = 0;
-        this.s.v.magnitude *= .8;
+        this.ship.accel = 0;
+        this.ship.v.magnitude *= .8;
         break;
+
       case " ":
+        let shipPresent = false;
+        for( let obj of this.objects )
+          if( obj.type == c.OBJECT_TYPE_SHIP )
+          {
+            shipPresent = true;
+            break;
+          }
+        if( shipPresent == false && this.e.numShips >= 0 )
+          this.respawn = true;
+        else
+          this.ship.fireCannon = true;
         break;
+
       case "t":
+        this.ship.fireTorpedo = true;
         break;
     }
   }
@@ -269,21 +295,54 @@ class gameEngine
   {
     var obj;
     // collision detection
+    for( let i = 0;i < this.objects.length - 1;i++ )
+      for( let j = i + 1;j < this.objects.length;j++ )
+      {
+        let obj1 = this.objects[ i ];
+        let obj2 = this.objects[ j ];
+
+        if( obj1.type != c.OBJECT_TYPE_NONE && obj2.type != c.OBJECT_TYPE_NONE )
+        {
+          let colDist = obj1.colRadius + obj2.colRadius;
+          let actDist = obj1.p.distanceTo( obj2.p );
+          if( actDist < colDist )
+          {
+            let adjJust = colDist - actDist;
+            let dir = obj2.p.directionTo( obj1.p );
+            let spd = obj2.v.dot( dir ) + obj1.v.dot( dir + c.PI ); // velocity towards each other.
+            if( spd > 0 )  // make sure they're moving toward each other
+            {
+              let co = new CollisionObject( obj2, new Vector( spd * obj2.mass / obj1.mass, dir ), adjJust );
+              obj1.colList.push( co );
+              co = new CollisionObject( obj1, new Vector( spd * obj1.mass / obj2.mass, dir - c.PI ), adjJust );
+              obj2.colList.push( co );
+            }
+          }
+        }
+      }
 
     // update objects
-    for( obj of this.objects )
-      obj.update();
+    for( let i = 0;i < this.objects.length;i++ )
+      if( this.objects[ i ].update( this ) == false )
+        this.objects.splice( i, 1 );
     // spawn
-    
+    if( this.gameOn )
+    {
+
+    }
     // events
+    this.events.update();
   }
 
   draw()
   {
     var obj;
+
+    this.ctx.clearRect( 0, 0, c.SCREEN_WIDTH, c.SCREEN_HEIGHT );
+
     // draw
     for( obj of this.objects )
-      obj.draw();
+      obj.draw( this.ctx );
 
     // display the remaining ships
     this.ctx.strokeStyle = 'black';
@@ -309,8 +368,8 @@ class gameEngine
     if( this.respawn == true )
     {
       this.respawn = false;
-      this.s = new Ship();
-      this.addObj( this.s );
+      this.ship = new Ship();
+      this.addObj( this.ship );
     }
 
     this.update( deltaMs );
@@ -325,7 +384,7 @@ function gameLoop( timeStamp )
   var delta = timeStamp - lastTimestamp;
   lastTimestamp = timeStamp;
   gEngine.loop( delta );
-  window.requestAnimationFrame( gameLoop );
+  sleep( 10 ).then(() => { window.requestAnimationFrame( gameLoop ); } );
 }
 
 function keyDownHandler( e ) { gEngine.keyDownHandler( e ); }
@@ -338,4 +397,9 @@ function gameInit()
   // document.addEventListener( "keyup", keyUpHandler, false );
 
   window.requestAnimationFrame( gameLoop );
+}
+
+function sleep( ms )
+{
+  return new Promise( resolve => setTimeout( resolve, ms ) );
 }

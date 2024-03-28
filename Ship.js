@@ -138,6 +138,7 @@ import { WorldObject } from './Utils.js';
 import { Line, Shape } from './Shape.js';
 import { randInt, randFloat } from './Utils.js';
 import { Point, Vector } from './Vector.js';
+import { SmokeParticle, CannonParticle, Torpedo } from './Particles.js';
 
 export class Ship extends WorldObject
 {
@@ -159,9 +160,9 @@ export class Ship extends WorldObject
     this.fireCannon = false;
     this.fireTorpedo = false;
     this.rounds = 50;
+    this.torpedos = 50;
     this.fuel = 50.0;
     this.torpedoDelay = 0;
-
   }
 
   update( e )
@@ -196,19 +197,19 @@ export class Ship extends WorldObject
 
     if( this.accel > 0 )
     {
-      p = new SmokeParticle( new Point( this.p.x, this.p.y ).move( new Vector( 3, this.a + c.PI ) ),
-                             new Vector( 3, this.a + c.PI + randFloat( -.3, .3 ) ),
-                             randInt( 5, 12 ),
-                             this.accel * randInt( 15, 30 ) );
+      let p = new SmokeParticle( new Point( this.p.x, this.p.y ).move( new Vector( 3, this.a + c.PI ) ),
+                                 new Vector( 3, this.a + c.PI + randFloat( -.3, .3 ) ),
+                                 randInt( 5, 12 ),
+                                 this.accel * randInt( 15, 30 ) );
       e.addObj( p );
     }
 
     if( this.fireCannon == true && this.rounds > 0 )
     {
-      p = new CanonParticle( new Point( this.p.x + 10 * Math.cos( this.a ),
-                                        this.p.y - 10 * Math.sin( this.a ) ),
-                             new Vector( 7, this.a ).add( this.v ),
-                             120 );
+      let p = new CannonParticle( new Point( this.p.x + 10 * Math.cos( this.a ),
+                                             this.p.y - 10 * Math.sin( this.a ) ),
+                                  new Vector( 7, this.a ).add( this.v, true ),
+                                  120 );
       e.addObj( p );
       this.fireCannon = false;
       this.rounds -= .5;
@@ -223,19 +224,21 @@ export class Ship extends WorldObject
     }
 
     if( this.fireTorpedo == true )
+    {
       if( this.torpedos > 0 )
       {
-        p = new Torpedo( new Point( this.p.x + 20 * Math.cos( this.a ),
-                                    this.p.y - 20 * Math.sin( this.a ) ),
-                         new Vector( 7, this.a ).add( this.v ),
-                         150 );
+        let p = new Torpedo( new Point( this.p.x + 20 * Math.cos( this.a ),
+                                       this.p.y - 20 * Math.sin( this.a ) ),
+                             new Vector( 7, this.a ).add( this.v ),
+                             150 );
         e.addObj( p );
         this.torpedos -= 10;
         this.torpedoDelay = c.TORPEDO_DELAY;
         if( e.score > c.TORPEDO_COST )
           e.score -= c.TORPEDO_COST;
-        this.fireTorpedo = false;
       }
+      this.fireTorpedo = false;
+    }
 
     while( this.colList.length )
     {
@@ -292,10 +295,10 @@ export class Ship extends WorldObject
     }
   }
 
-  draw( ctx, p, a )
+  draw( ctx )
   {
-    this.shape.draw( ctx, p, a );
-    vctx.strokeStyle = "black";
+    this.shape.draw( ctx, this.p, this.a );
+    ctx.strokeStyle = "black";
     ctx.beginPath();
     ctx.rect( 100, 5, 100 + 200, 7 );
     ctx.stroke();

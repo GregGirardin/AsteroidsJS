@@ -129,20 +129,21 @@ export class Point
 
   distanceTo( p )
   {
-    return Math.sqrt( ( this.x - p.x ) ^ 2 + ( this.y - p.y ) ^ 2 );
+    return Math.sqrt( ( this.x - p.x ) ** 2 + ( this.y - p.y ) ** 2 );
   }
 
   directionTo( p )
   {
-    direction = 0;
+    let direction = 0;
 
-    cx = p.x - self.x;
-    cy = p.y - self.y;
+    let cx = p.x - this.x;
+    let cy = p.y - this.y;
 
-    mag = Math.sqrt( cx ^ 2 + cy ^ 2 );
+    let mag = Math.sqrt( cx ** 2 + cy ** 2 );
+
     if( mag > c.EFFECTIVE_ZERO )
     {
-      if( Math.fabs( cx ) < c.EFFECTIVE_ZERO )
+      if( Math.abs( cx ) < c.EFFECTIVE_ZERO )
       {
         if( cy > 0 )
           direction = -c.PI / 2;
@@ -185,7 +186,9 @@ export class Vector
   {
     let cx = this.dx() + v.magnitude * Math.cos( v.direction ) * factor;
     let cy = this.dy() - v.magnitude * Math.sin( v.direction ) * factor;
-    let mag = Math.sqrt( cx ^ 2, cy ^ 2 );
+
+    let mag = Math.sqrt( cx ** 2 + cy ** 2 );
+
     let direct = dir( cx, cy );
     if( mod )
     {
@@ -193,7 +196,7 @@ export class Vector
       this.direction = direct;
     }
 
-    return( new Vector( mag, direct ) );
+    return this;
   }
 
   adjust( aVec, weight )
@@ -204,30 +207,31 @@ export class Vector
     var cx = this.dx() + adx;
     var cy = this.dy() + ady;
 
-    this.magnitude = Math.sqrt( cx * cx + cy * cy );
+    this.magnitude = Math.sqrt( cx ** 2 + cy ** 2 );
     this.direction = dir( cx, cy );
+
+    return this;
   }
 
   dx() { return( this.magnitude * Math.cos( this.direction ) ); }
   dy() { return( -1 * this.magnitude * Math.sin( this.direction ) ); }
   flipx() { this.direction = dir( -this.dx(), this.dy() ); }
-  flipy() { this.direction = dir( self.dx(), -self.dy() ); }
+  flipy() { this.direction = dir( this.dx(), -this.dy() ); }
   dot( angle )
   {
-    var theta = Math.fabs( this.direction - angle );
+    var theta = Math.abs( this.direction - angle );
     return( this.magnitude * Math.cos( theta ) );
   }
-
 }
 
 export function dir( dx, dy )
 {
   let direction = 0;
-  let mag = Math.sqrt( dx ^ 2 + dy ^ 2 );
+  let mag = Math.sqrt( dx ** 2 + dy ** 2 );
 
   if( mag > c.EFFECTIVE_ZERO )
   {
-    if( Math.fabs( dx ) < c.EFFECTIVE_ZERO )
+    if( Math.abs( dx ) < c.EFFECTIVE_ZERO )
     {
       if( dy > 0 )
         direction = -c.PI / 2;
@@ -247,7 +251,7 @@ export function vectorDiff( f, t )
   let dx = t.dx() - f.dx();
   let dy = t.dy() - f.dy();
 
-  let m = Math.sqrt( dx ^ 2 + dy ^ 2 );
+  let m = Math.sqrt( dx ** 2 + dy ** 2 );
   let d = dir( dx, dy );
 
   return new Vector( m, d );
