@@ -19,8 +19,8 @@ export class WorldObject
 
   offScreen()
   {
-    if( this.p.x < -c.SCREEN_BUFFER || this.p.x > c.SCREEN_WIDTH + SCREEN_BUFFER ||
-        this.p.y < -c.SCREEN_BUFFER || this.p.y > c.SCREEN_HEIGHT + SCREEN_BUFFER )
+    if( this.p.x < -c.SCREEN_BUFFER || this.p.x > c.SCREEN_WIDTH + c.SCREEN_BUFFER ||
+        this.p.y < -c.SCREEN_BUFFER || this.p.y > c.SCREEN_HEIGHT + c.SCREEN_BUFFER )
       return true;
     else
       return false;
@@ -68,7 +68,7 @@ export class gameEvents
 
   newEvent( msg, dur, action )
   {
-    ev = new Event( msg, dur, action )
+    let ev = new Event( msg, dur, action )
     this.eventList.push( ev );
   }
 
@@ -76,7 +76,7 @@ export class gameEvents
   {
     if( this.eventList.length > 0 )
     {
-      e = this.eventList[ 0 ];
+      let e = this.eventList[ 0 ];
       e.dur--;
       if( e.dur < 0 )
       {
@@ -101,13 +101,13 @@ export class gameEvents
 
 export class spawnAble
 {
-  constructor( spawnAlbe )
+  constructor( initparams )
   {
-    this.min = spawnAlbe[ 0 ];
-    this.max = spawnAlbe[ 1 ];
-    this.num = spawnAlbe[ 2 ];
-    this.count = spawnAlbe[ 3 ];
-    this.newFunc = spawnAlbe[ 4 ];
+    this.min = initparams[ 0 ];
+    this.max = initparams[ 1 ];
+    this.num = initparams[ 2 ];
+    this.count = initparams[ 3 ];
+    this.newFunc = initparams[ 4 ];
   }
 
   update( e )
@@ -117,8 +117,8 @@ export class spawnAble
       this.count--;
       if( this.count <= 0 )
       {
-        this.count = randInt( self.min, self.max );
-        s = this.newFunc();
+        this.count = randInt( this.min, this.max );
+        let s = this.newFunc();
         e.addObj( s );
         if( this.num > 0 )
           this.num--;
@@ -132,21 +132,21 @@ export class spawnList
   constructor( l )
   {
     this.spawnAbles = [];
-    for( o of l )
+    for( let o of l )
       this.spawnAbles.push( new spawnAble( o ) );
   }
 
   update( e )
   {
+    let s;
+    let done = true; // Are we done spawning?
+
     for( s of this.spawnAbles )
-      s.update( e )
-    let done = true;
-    for( s of this.spawnAbles )
+    {
+      s.update( e );
       if( s.num > 0 )
-      {
-        done = false;
-        break;
-      }
+        done = false; // not done 
+    }
 
     return done;
   }

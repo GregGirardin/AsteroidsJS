@@ -1,216 +1,251 @@
-/*
-'''
-A base class to handle piloting ships / AI stuff.
 
-hList is a list of heuristics
-Initially we choose the first element.
+import { c } from './constants.js';
+import { angleTo, angleNorm, randInt, randFloat } from './Utils.js';
+import { Point, Vector, vectorDiff } from './Vector.js';
 
+export class Heuristic
+{
+  constructor( id, next, heuristic )
+  {
+    this.id = id;
+    this.next = next;
+    this.heuristic = heuristic;
+  }
+}
 
-Identifier # a string to ID
-Next ID
-  Type (Goto, Delay, Attack)
-    Goto
-      Point
-      ApproachType (Slow, fast)
-        Slow # Try to stop at point
-        Fast # Just blow past point.
+export class HeuristicGo
+{
+  constructor( velocity, duration )
+  {
+    this.hVelocity = velocity;
+    this.hDuration = duration;
+  }
 
-    Delay
-      duration
-      Next
+  update( s, e )
+  {
+    if( this.hDuration > 0 )
+    {
+      this.hDuration--;
+      if( s.v.magnitude < this.hVelocity )
+        s.accel = c.THRUST_MED;
+      else
+        s.accel = 0;
+      return false;
+    }
+    return true;
+  }
+}
 
-    Attack
-      duration
-'''
-import time, math, random
-from Constants import *
-from Shape import *
-from Ship import *
-from Vector import *
+export class HeuristicFace
+{
+  constructor( angle )
+  {
+    this.hAngle = angle;
+  }
 
-class HeuristicGo():
-  def __init__( self, velocity, duration ):
-    self.hVelocity = velocity
-    self.hDuration = duration
+  update( s, e )
+  {
+    let dirTo = angleTo( s.a, this.hAngle );
+    if( Math.abs( dirTo ) > .05 )
+    {
+      s.spin = dirTo / 20;
+      return false;
+    }
+    else
+    {
+      s.spin = 0;
+      return true;
+    }
+  }
+}
 
-  def update( self, s, e ):
-    if self.hDuration > 0:
-      self.hDuration -= 1
-      if s.v.magnitude < self.hVelocity:
-        s.accel = THRUST_MED
-      else:
-        s.accel = 0
-      return False
-    else:
-      return True
+export class HeuristicStop
+{
+  update( s, e )
+  {
+    if( s.v.magnitude > c.SPEED_SLOW / 20 )
+    {
+      // turn around
+      let targetDir = angleNorm( s.v.direction + c.PI );
+      let dirTo = angleTo( s.a, targetDir );
+      if( Math.abs( dirTo ) > .05 )
+      {
+        s.accel = 0;
+        s.spin = dirTo / 20;
+      }
+      else
+      {
+        s.accel = c.THRUST_HI;
+        s.spin = 0;
+      }
+      return false;
+    }
 
-class HeuristicFace():
-  def __init__( self, angle ):
-    self.hAngle = angle
+    s.accel = 0;
+    s.spin = 0;
+    return true;
+  }
+}
 
-  def update( self, s, e ):
-    dirTo = angleTo( s.a, self.hAngle )
-    if math.fabs( dirTo ) > .05:
-      s.spin = dirTo / 20
-      return False
-    else:
-      s.spin = 0
-      return True
+export class HeuristicGoto
+{
+  constructor( target, distance )
+  {
+    this.target = target;
+    this.distance = distance;
+  }
 
-class HeuristicStop():
-  def update( self, s, e ):
-    if s.v.magnitude > SPEED_SLOW / 20:
-      # turn around
-      targetDir = angleNorm( s.v.direction + PI )
-      dirTo = angleTo( s.a, targetDir )
-      if math.fabs( dirTo ) > .05:
-        s.accel = 0
-        s.spin = dirTo / 20
-      else:
-        s.accel = THRUST_HI
-        s.spin = 0
-      return False
+  update( s, e )
+  {
+    let distToTarget = s.p.distanceTo( this.target );
 
-    s.accel = 0
-    s.spin = 0
-    return True
+    s.accel = 0;
+    s.spin = 0;
 
-class HeuristicGoto():
-  def __init__( self, target, distance ):
-    self.target = target
-    self.distance = distance # close do we need to get for success
-    self.targetReached = False
+    if( ( distToTarget < c.OBJECT_DIST_FAR ) &&
+         ( ( this.distance == c.OBJECT_DIST_FAR ) ||
+           ( ( distToTarget < c.OBJECT_DIST_MED && this.distance == c.OBJECT_DIST_MED ) ||
+           ( distToTarget < c.OBJECT_DIST_NEAR ) ) ) )
+      return true;
 
-  def update( self, s, e ):
-    # determine ideal vector based on distance
-    distToTarget = s.p.distanceTo( self.target )
+  let dirToTarget = s.p.directionTo( this.target );
+  let targetVector = new Vector( c.SPEED_HI * 1.5, dirToTarget ); // hack. Long vector and drag smooth out ship.
+  let correctionVec = vectorDiff( s.v, targetVector ); // vector to make our velocity approach targetVector
+  let da = angleTo( s.a, correctionVec.direction );
 
-    s.accel = 0
-    s.spin = 0
+  s.spin = da / 20;
+  let dp = s.v.dot( correctionVec.direction );
+  if( dp < c.SPEED_HI )
+    s.accel = c.THRUST_HI;
+  else if( dp < c.SPEED_MED )
+    s.accel = c.THRUST_LOW;
 
-    if( ( distToTarget < OBJECT_DIST_FAR ) and
-        ( ( self.distance == OBJECT_DIST_FAR ) or
-         ( ( distToTarget > OBJECT_DIST_MED and self.distance == OBJECT_DIST_MED ) or
-         ( distToTarget < OBJECT_DIST_NEAR ) ) ) ):
-      return True
+  // Cheating. Drag allows us to stay behind target vector. Tricky to fix and this works.
+  // otherwise you have to deal with turning around to slow down if you're too fast.
+  s.v.magnitude *= .99;
 
-    dirToTarget = s.p.directionTo( self.target )
-    targetVector = Vector( SPEED_HI * 1.5, dirToTarget ) # hack. Long vector and drag smooth out ship.
-    correctionVec = vectorDiff( s.v, targetVector ) # vector to make our velocity approach targetVector
+  return false;
+  }
+}
 
-    da = angleTo( s.a, correctionVec.direction )
+export function HeuristicGotoRandom()
+{
+  return( new HeuristicGoto( new Point( randInt( 0, c.SCREEN_WIDTH ), randInt( 0, c.SCREEN_HEIGHT ), c.OBJECT_DIST_MED ) ) );
+}
 
-    s.spin = da / 20
-    dp = s.v.dot( correctionVec.direction )
-    if dp < SPEED_HI:
-      s.accel = THRUST_HI
-    elif dp < SPEED_MED:
-      s.accel = THRUST_LOW
+export class HeuristicWait
+{
+  constructor( duration )
+  {
+    this.hDuration = duration;
+  }
 
-    # Cheating. Drag allows us to stay behind target vector. Tricky to fix and this works.
-    # otherwise you have to deal with turning around to slow down if you're too fast.
-    s.v.magnitude *= .99
+  update( s, e )
+  {
+    s.accel = 0;
+    s.spin = 0;
 
-    if debugVectors:
-      s.tv = targetVector
-      s.cv = desiredVec
-      s.target = target
+    this.hDuration--;
+    if( this.hDuration < 0 )
+      return true;
 
-    return False
+   return false;
+  }
+}
 
-def HeuristicGotoRandom():
-  return HeuristicGoto( Point( SCREEN_WIDTH * random.random(), SCREEN_HEIGHT * random.random() ), OBJECT_DIST_MED )
+export class HeuristicAttack
+{
+  constructor( duration = 50 )
+  {
+    this.duration = duration;
+    this.durationCounter = duration;
+    this.attackState = c.ATTACK_INIT;
+    this.aangleOffset = 0;
+    this.ttNextAttack = 1;
+  }
 
-class HeuristicWait():
-  def __init__( self, duration ):
-    self.hDuration = duration
+  update( s, e )
+  {
+    this.durationCounter--;
+    if( this.durationCounter <= 0 )
+    {
+      this.durationCounter = this.duration;
+      return true;
+    }
+    if( this.attackState == c.ATTACK_INIT )
+    {
+      if( this.ttNextAttack == 0 )
+      {
+        this.attackState = c.ATTACK_ALIGN;
+        this.aangleOffset = randFloat( -.2, .2 ); // shoot a bit randomly
+      }
+      else
+        this.ttNextAttack--;
+    }
 
-  def update( self, s, e ):
-    s.accel = 0
-    s.spin = 0
+    if( this.attackState == c.ATTACK_ALIGN )
+    {
+      let sh = false;
+      for( obj of e.objects )
+      {
+        if( obj.type == c.OBJECT_TYPE_SHIP )
+        {
+          sh = obj;
+          break;
+        }
+      }
+      if( sh == false )
+        return true;
 
-    self.hDuration -= 1
-    if self.hDuration < 0:
-      return True
-    return False
+      let goalDir = dir( sh.p.x - s.p.x, sh.p.y - s.p.y ) + this.aangleOffset;
+      let aToGoal = angleTo( s.a, goalDir );
 
-class HeuristicAttack():
-  def __init__( self, duration=50 ):
-    self.duration = duration
-    self.durationCounter = duration
-    self.attackState = ATTACK_INIT
-    self.aangleOffset = 0
-    self.ttNextAttack = 1
+      if( Math.abs( aToGoal ) < .1 )
+      {
+        s.cannon = 1; //  cannon handled in update
+        this.attackState = c.ATTACK_INIT;
+        this.ttNextAttack = random.randrange( 20, 70 );
+      }
+      else
+        s.spin = aToGoal / 10;
+      }
+    return false;
+  }
+}
 
-  def update( self, s, e ):
-    self.durationCounter -= 1
-    if self.durationCounter <= 0:
-      self.durationCounter = self.duration
-      return True
+export class Pilot
+{
+  constructor( parent, hList )
+  {
+    this.parent = parent;
+    this.hList = hList;
 
-    if self.attackState == ATTACK_INIT:
-      if self.ttNextAttack == 0:
-        self.attackState = ATTACK_ALIGN
-        self.aangleOffset = random.uniform( -.2, .2 ) # shoot a bit randomly
-      else:
-        self.ttNextAttack -= 1
+    if( this.hList )
+      this.currentH = hList[ 0 ];
+    else
+      this.currentH = undefined;
+  }
 
-    if self.attackState == ATTACK_ALIGN:
-      sh = None
-      for obj in e.objects:
-        if obj.type == OBJECT_TYPE_SHIP:
-          sh = obj
-          break
-      if not sh:
-        return True
+  setHlist( hList )
+  {
+    this.hList = hList;
+    this.currentH = hList[ 0 ];
+  }
 
-      goalDir = dir( sh.p.x - s.p.x, sh.p.y - s.p.y ) + self.aangleOffset
-      aToGoal = angleTo( s.a, goalDir )
+  pilot( e )
+  {
+    // Adjust, thrust, direction, and cannon based on heuristics.
+    if( this.hList == undefined || this.currentH == undefined )
+      return;
 
-      if math.fabs( aToGoal ) < .1:
-        s.cannon = 1 # cannon handled in update
-        self.attackState = ATTACK_INIT
-        self.ttNextAttack = random.randrange( 20, 70 )
-      else:
-        s.spin = aToGoal / 10
+    let s = this.currentH.heuristic.update( this.parent, e );
 
-    return False
-
-class Heuristic():
-  def __init__( self, id, next, heuristic ):
-    self.id = id
-    self.next = next
-    self.heuristic = heuristic
-
-# Auto piloted things inherit from this class. They are also "WorldObject"s
-class Pilot():
-  def __init__( self, hList ):
-    self.hList = hList
-
-    if self.hList:
-      self.currentH = hList[ 0 ]
-    else:
-      self.currentH = None
-
-    if debugVectors:
-      self.tv = Vector( 0, 0 )
-      self.cv = Vector( 0, 0 )
-      self.target = Point( 0, 0)
-
-  def setHlist( self, hList ):
-    self.hList = hList
-    self.currentH = hList[ 0 ]
-
-  def pilot( self, e ):
-    # Adjust, thrust, direction, and cannon based on heuristics.
-    if self.hList == None or self.currentH == None:
-      return
-
-    s = self.currentH.heuristic.update( self, e )
-
-    if s == True:
-      for h in self.hList:
-        if h.id == self.currentH.next:
-          self.currentH = h
-          break
-*/
+    if( s == true )
+      for( let h of this.hList )
+        if( h.id == this.currentH.next )
+        {
+          this.currentH = h;
+          break;
+        }
+  }
+}
