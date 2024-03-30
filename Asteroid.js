@@ -71,7 +71,7 @@ export class Asteroid extends( WorldObject )
 
       if( colObj.o.type == c.OBJECT_TYPE_NONE )
         continue;
-    
+  
       if( ( this.iron == true || 
           ( colObj.i.magnitude < colObj.SMALL_IMPULSE && colObj.o.weapon == false ) ) && colObj.o.type != c.OBJECT_TYPE_BH ) 
       {
@@ -81,7 +81,7 @@ export class Asteroid extends( WorldObject )
       }
       else
       {
-        let count = randInt( 10, 20 );
+        let count = randInt( 6, 12 );
         for( let v = 1;v < count;v++ )
         {
           let p = new SmokeParticle( new Point( this.p.x, this.p.y ),
@@ -90,7 +90,7 @@ export class Asteroid extends( WorldObject )
                                      randInt( 3, 10 ));
           gManager.addObj( p );
         }
-  
+
         if( this.colRadius > c.MIN_ASTEROID_RADIUS * 2 )
         {
           let vector = randFloat( 0, c.TAU );

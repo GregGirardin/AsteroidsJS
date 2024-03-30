@@ -153,7 +153,7 @@ class gameManager
 
     // update objects
     for( let i = 0;i < this.objects.length;i++ )
-      if( this.objects[ i ].update( this ) == false )
+      if( this.objects[ i ].update( ) == false )
         this.objects.splice( i, 1 );
       
     // spawn
@@ -204,7 +204,7 @@ class gameManager
     // display the remaining ships
     this.ctx.strokeStyle = 'black';
 
-    for( var x = 0;x < this.numShipes;x++ )
+    for( var x = 0;x < this.numShips;x++ )
     {
       this.ctx.beginPath();
       this.ctx.moveTo( 10 + 20 * x, 20 );

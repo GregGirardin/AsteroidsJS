@@ -10,19 +10,12 @@ export class Ship extends WorldObject
 {
   constructor()
   {
-    super( c.OBJECT_TYPE_SHIP,
-           new Point( c.SCREEN_WIDTH * .75, c.SCREEN_HEIGHT * .5 ),
-           c.PI,
-           new Vector( 0, 0 ),
-           7,
-           c.SHIP_MASS,
-           false );
+    super( c.OBJECT_TYPE_SHIP, new Point( c.SCREEN_WIDTH * .75, c.SCREEN_HEIGHT * .5 ), c.PI, new Vector( 0, 0 ), 7, c.SHIP_MASS, false );
 
     const shipShape = [ [ -5, 5, 10, 0, 0 ],
                         [ -5,-5, 10, 0, 0 ],
                         [ -5,-5, -5, 5, 0 ] ];
     this.shape = new Shape( shipShape );
-
     this.fireCannon = false;
     this.fireTorpedo = false;
     this.rounds = c.SHIP_MAX_ROUNDS;
@@ -31,7 +24,7 @@ export class Ship extends WorldObject
     this.torpedoDelay = 0;
   }
 
-  update( e )
+  update()
   {
     super.update();
   
@@ -64,23 +57,19 @@ export class Ship extends WorldObject
     if( this.accel > 0 )
     {
       let p = new SmokeParticle( new Point( this.p.x, this.p.y ).move( new Vector( 3, this.a + c.PI ) ),
-                                 new Vector( 3, this.a + c.PI + randFloat( -.3, .3 ) ),
-                                 randInt( 5, 12 ),
-                                 this.accel * randInt( 15, 30 ) );
+                                 new Vector( 3, this.a + c.PI + randFloat( -.3, .3 ) ), randInt( 5, 12 ), this.accel * randInt( 15, 30 ) );
       gManager.addObj( p );
     }
 
     if( this.fireCannon == true && this.rounds > 0 )
     {
-      let p = new CannonParticle( new Point( this.p.x + 10 * Math.cos( this.a ),
-                                             this.p.y - 10 * Math.sin( this.a ) ),
-                                  new Vector( 7, this.a ).add( this.v, true ),
-                                  120 );
+      let p = new CannonParticle( new Point( this.p.x + 10 * Math.cos( this.a ), this.p.y - 10 * Math.sin( this.a ) ),
+                                  new Vector( 7, this.a ).add( this.v, true ), 120 );
       gManager.addObj( p );
       this.fireCannon = false;
       this.rounds -= .5;
-      if( e.score > c.CANNON_COST )
-        e.score -= c.CANNON_COST;
+      if( gManager.score > c.CANNON_COST )
+      gManager.score -= c.CANNON_COST;
     }
 
     if( this.torpedoDelay > 0 )
@@ -93,15 +82,13 @@ export class Ship extends WorldObject
     {
       if( this.torpedos > 0 )
       {
-        let p = new Torpedo( new Point( this.p.x + 20 * Math.cos( this.a ),
-                                       this.p.y - 20 * Math.sin( this.a ) ),
-                             new Vector( 7, this.a ).add( this.v ),
-                             150 );
+        let p = new Torpedo( new Point( this.p.x + 20 * Math.cos( this.a ), this.p.y - 20 * Math.sin( this.a ) ),
+                             new Vector( 7, this.a ).add( this.v ), 150 );
         gManager.addObj( p );
         this.torpedos -= 10;
         this.torpedoDelay = c.TORPEDO_DELAY;
-        if( e.score > c.TORPEDO_COST )
-          e.score -= c.TORPEDO_COST;
+        if( gManager.score > c.TORPEDO_COST )
+        gManager.score -= c.TORPEDO_COST;
       }
       this.fireTorpedo = false;
     }
@@ -144,15 +131,14 @@ export class Ship extends WorldObject
       }
       else
       {
-        e.numShips -= 1;
-        if( e.numShips < 0 )
-          e.events.newEvent( "Game Over man!", c.EVENT_DISPLAY_COUNT * 2, gameOver );
+        gManager.numShips -= 1;
+        if( gManager.numShips < 0 )
+          gManager.events.newEvent( "Game Over Man!", c.EVENT_DISPLAY_COUNT * 2, gameOver );
         for( var ix = 0;ix < randInt( 30, 40 );ix++ )
         {
           let p = new SmokeParticle( new Point( this.p.x, this.p.y ),
                                      new Vector( randFloat( 0, 2 ), c.TAU * randFloat( 0, 1 ) ).add( this.v ),
-                                     randInt( 20, 50 ),
-                                     randFloat( 3, 3.5 ) );
+                                     randInt( 20, 50 ), randFloat( 3, 3.5 ) );
            gManager.addObj( p );
         }
         return false;

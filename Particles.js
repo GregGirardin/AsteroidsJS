@@ -8,7 +8,7 @@ export class SmokeParticle extends WorldObject
 {
   constructor( p, v, ttl, size )
   {
-    super( c.OBJECT_TYPE_NONE, p, 0, v, false ); v
+    super( c.OBJECT_TYPE_NONE, p, 0, v, false );
     this.ttl = ttl;
     let s = [ [ -size, -size, size, size, "black" ],
               [ -size,  size, size,-size, "black" ] ];
@@ -32,10 +32,7 @@ export class SmokeParticle extends WorldObject
       return false;
   }
 
-  draw( ctx )
-  {
-    this.shape.draw( ctx, this.p, this.a );
-  }
+  draw( ctx ) { this.shape.draw( ctx, this.p, this.a ); }
 }
 
 export class CannonParticle extends WorldObject
@@ -58,8 +55,17 @@ export class CannonParticle extends WorldObject
     {
       let colObj = this.colList.shift();
       let t = colObj.o.type;
-      if( t == c.OBJECT_TYPE_TORPEDO || t == c.OBJECT_TYPE_NONE || t == c.OBJECT_TYPE_CANNON )
-        return true;
+      // if( t == c.OBJECT_TYPE_TORPEDO || t == c.OBJECT_TYPE_NONE || t == c.OBJECT_TYPE_CANNON )
+      let count = randInt( 6, 10 );
+      for( let v = 1;v < count;v++ )
+      {
+        let p = new SmokeParticle( new Point( this.p.x, this.p.y ),
+                                   new Vector( randFloat( 0, 2 ), randFloat( 0, c.TAU ) ),
+                                   randInt( 10, 20 ),
+                                   randInt( 3, 10 ));
+        gManager.addObj( p );
+      }
+      return false;
     }
     return true;
   }
@@ -122,4 +128,3 @@ export class Torpedo extends WorldObject
     ctx.stroke();
   }
 }
-  
