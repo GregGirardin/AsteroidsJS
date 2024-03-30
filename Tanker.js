@@ -1,7 +1,7 @@
 
 import { c } from './constants.js';
 import { Point, Vector } from './Vector.js';
-import { Heuristic, HeuristicFace, HeuristicGo, HeuristicStop, HeuristicWait } from './Pilot.js';
+import { Heuristic, HeuristicFace, HeuristicGo, HeuristicStop, HeuristicWait, HeuristicGoto } from './Pilot.js';
 import { WorldObject, angleTo, angleNorm, randInt, randFloat } from './Utils.js';
 import { Shape } from './Shape.js';
 import { Pilot } from './Pilot.js';
@@ -44,7 +44,7 @@ class Tanker extends WorldObject // Pilot):
 
     this.pilot = new Pilot( this, hList );
     }
-  
+
   update( e )
   {
     this.pilot.pilot( e );
@@ -90,11 +90,9 @@ class Tanker extends WorldObject // Pilot):
     {
       this.refuelComplete = true;
       e.events.newEvent( "Refuel Complete", c.EVENT_DISPLAY_COUNT / 2 );
-      hList = [ new Heuristic( "Depart",
-                               undefined,
-                               new HeuristicGoto( new Point( c.SCREEN_WIDTH * 1.1,
-                                                             randFloat( 0, c.SCREEN_HEIGHT ), c.OBJECT_DIST_NEAR ) ) ) ];
-      this.setHlist( hList );
+      let hList = [ new Heuristic( "Depart", undefined,
+                                   new HeuristicGoto( new Point( c.SCREEN_WIDTH * 1.1, randFloat( 0, c.SCREEN_HEIGHT ), c.OBJECT_DIST_NEAR ) ) ) ];
+      this.pilot.setHlist( hList );
     }
 
     while( this.colList.length )
@@ -142,17 +140,17 @@ class Tanker extends WorldObject // Pilot):
   draw( ctx )
   {
     this.shape.draw( ctx, this.p, this.a );
-    /*
+
     if( this.tPoint )
     {
-      canvas.create_line( p.x, p.y,
-                          this.tPoint.x + random.uniform( -2, 2 ),
-                          this.tPoint.y + random.uniform( -2, 2 ), fill="green")
+      ctx.beginPath();
+      ctx.strokeStyle = 'green';
+      ctx.moveTo( this.p.x, this.p.y );
+      ctx.lineTo( this.tPoint.x + randFloat( -2, 2 ), this.tPoint.y + randFloat( -2, 2 ) );
+      ctx.stroke();
     }
-    */
   }
 }
-
 
 export function newTanker()
 {

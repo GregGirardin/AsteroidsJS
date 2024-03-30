@@ -6,16 +6,17 @@ import { newBigAlien, newSmallAlien } from './Aliens.js';
 import { spawnList, CollisionObject, gameEvents } from './Utils.js';
 import { newAsteroid, newBlackhole } from './Asteroid.js';
 
+export let gManager; // a single global instance. Everything uses this.
 window.onload = gameInit;
 
-let sList = [ [ 1000, 5000, -1, 2000, newBlackhole ],
-              [ 1200, 2000, -1, 1200, newTanker ],
-              [  150,  220,  0,    0, newAsteroid ],
-              [  200,  300,  0,  500, newBigAlien ],
-              [  200,  300,  0, 1000, newSmallAlien ]
-            ];
+let spawnParams = [ [ 1000, 5000, -1, 2000, newBlackhole ], // -1 means can spawn forever but don't affect level complete
+                    [ 1200, 2000, -1, 1200, newTanker ],
+                    [  150,  220,  0,    0, newAsteroid ],
+                    [  200,  300,  0,  500, newBigAlien ],
+                    [  200,  300,  0, 1000, newSmallAlien ]
+                    ];
 
-class gameEngine
+class gameManager
 {
   constructor()
   {
@@ -45,10 +46,10 @@ class gameEngine
   {
     this.wave = wave;
     this.waveComplete = false
-    sList[ 2 ][ 2 ] = wave * 15;
-    sList[ 3 ][ 2 ] = wave * 10;
-    sList[ 4 ][ 2 ] = wave * 7;
-    this.spawnList = new spawnList( sList );
+    spawnParams[ 2 ][ 2 ] = wave * 15;
+    spawnParams[ 3 ][ 2 ] = wave * 10;
+    spawnParams[ 4 ][ 2 ] = wave * 7;
+    this.spawnList = new spawnList( spawnParams );
   }
 
   gameOver()
@@ -92,7 +93,7 @@ class gameEngine
 
       case "ArrowDown":
         this.ship.accel = 0;
-        this.ship.v.magnitude *= .8;
+        this.ship.v.magnitude *= .5; // decelerate fairly quickly.
         break;
 
       case " ":
@@ -104,9 +105,7 @@ class gameEngine
             break;
           }
         if( shipPresent == false && this.numShips >= 0 )
-        {
           this.respawn = true;
-        }
         else
           this.ship.fireCannon = true;
 
@@ -114,6 +113,10 @@ class gameEngine
 
       case "t":
         this.ship.fireTorpedo = true;
+        break;
+
+      case "n":
+        this.newGame();
         break;
     }
   }
@@ -151,10 +154,8 @@ class gameEngine
     // update objects
     for( let i = 0;i < this.objects.length;i++ )
       if( this.objects[ i ].update( this ) == false )
-      {
-        //console.log( "Del:", this.objects[ i ] );
         this.objects.splice( i, 1 );
-      }
+      
     // spawn
     if( this.gameOn )
       if( this.spawnList.update( this ) == true )
@@ -217,6 +218,8 @@ class gameEngine
     this.ctx.fillText( "Score:" + this.score,     c.SCREEN_WIDTH *  .6, 15 );
     this.ctx.fillText(  "High:" + this.highScore, c.SCREEN_WIDTH *  .7, 15 );
     this.ctx.fillText(  "Wave:" + this.wave,      c.SCREEN_WIDTH * .25, 15 );
+
+    this.events.draw( this );
   }
 
   loop( deltaMs ) // The game loop
@@ -233,21 +236,20 @@ class gameEngine
   }
 }
 
-let gEngine;
 let lastTimestamp = 0;
 function gameLoop( timeStamp )
 { 
   var delta = timeStamp - lastTimestamp;
   lastTimestamp = timeStamp;
-  gEngine.loop( delta );
+  gManager.loop( delta );
   sleep( 10 ).then(() => { window.requestAnimationFrame( gameLoop ); } );
 }
 
-function keyDownHandler( e ) { gEngine.keyDownHandler( e ); }
+function keyDownHandler( e ) { gManager.keyDownHandler( e ); }
 
 function gameInit()
 {
-  gEngine = new gameEngine();
+  gManager = new gameManager();
 
   document.addEventListener( "keydown", keyDownHandler, false );
 
@@ -257,4 +259,9 @@ function gameInit()
 function sleep( ms )
 {
   return new Promise( resolve => setTimeout( resolve, ms ) );
+}
+
+export function gameOver()
+{
+  gManager.gameOver();
 }

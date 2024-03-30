@@ -32,12 +32,12 @@ export class Asteroid extends( WorldObject )
     let v, initY;
     if( Math.random() < .5 )
     {
-      v = new Vector( randFloat( -.2, .2 ), randFloat( c.PI + c.PI * .2, c.PI + c.PI * .8 ) );
+      v = new Vector( randFloat( .05, .3 ), randFloat( c.PI + c.PI * .2, c.PI + c.PI * .8 ) );
       initY = -c.SCREEN_BUFFER + 1;
     }
     else
     {
-      v = new Vector( randFloat( -.2, .2 ), randFloat( c.PI * .2, c.PI * .8 ) );
+      v = new Vector( randFloat( .05, .3 ), randFloat( c.PI * .2, c.PI * .8 ) );
       initY = c.SCREEN_HEIGHT + c.SCREEN_BUFFER - 1;
     }
 
@@ -49,7 +49,7 @@ export class Asteroid extends( WorldObject )
 
     super( c.OBJECT_TYPE_ASTEROID,
            new Point( randInt( c.SCREEN_WIDTH * .1, c.SCREEN_WIDTH * .8 ), initY ),
-           0, v, radius, m );
+           0, v, radius, m, false );
   
     this.shape = new Shape( s );
     this.collision = c.OBJECT_TYPE_NONE;
@@ -120,7 +120,7 @@ export class Asteroid extends( WorldObject )
 
 export function newAsteroid()
 {
-  return( new Asteroid( randInt( 10, 50), ( Math.random() < .2 ) ? true : false ) );
+  return( new Asteroid( randInt( 10, 50 ), ( Math.random() < .2 ) ? true : false ) );
 }
 
 export class Blackhole extends WorldObject
@@ -131,10 +131,11 @@ export class Blackhole extends WorldObject
     super( c.OBJECT_TYPE_BH,
            new Point( -5, randInt( c.SCREEN_HEIGHT * .2, c.SCREEN_HEIGHT * .8 ) ),
            0,
-           new Vector( randFloat( 1.4, 3), randFloat( -.5, .5 )),
+           new Vector( randFloat( 1.4, 3), randFloat( -.5, .5 ) ),
            radius,
            c.BH_MASS * radius,
            true );
+
     this.collision = c.OBJECT_TYPE_NONE;
   }
 
@@ -145,13 +146,18 @@ export class Blackhole extends WorldObject
 
     super.update( e );
 
+    while( this.colList.length )
+      this.colList.shift(); // BH doesn't care, just clear the list.
+
     for( let obj of e.objects )
       if( obj != this )
       {
-        let dis = obj.p.distanceTo( this.a );
+        let dis = obj.p.distanceTo( this.p );
+        if( dis < this.colRadius )
+          dis = this.colRadius;
         let dir = obj.p.directionTo( this.p );
-        let m = this.mass / ( dis ** 2 );
-        obj.v.add( new Vector( m, dir ) );
+        let mag = this.mass / ( dis ** 2 );
+        obj.v.add( new Vector( mag, dir ) ); // debug
         if( obj.v.magnitide > c.SPEED_HI )
           obj.v.magnitide = c.SPEED_HI;
       }
@@ -161,11 +167,12 @@ export class Blackhole extends WorldObject
   draw( ctx )
   {
     ctx.beginPath();
-    ctx.arc ( this.p.x, this.p.y, this.colRadius, 0, 2 * Math.PI, "black") ;
-    ctx.stroke();
+    ctx.arc ( this.p.x, this.p.y, this.colRadius, 0, 2 * Math.PI, "black" ) ;
+    ctx.fill();
   }
 }
 
 export function newBlackhole()
 {
-  return( new Blackhole() ); }
+  return( new Blackhole() );
+}

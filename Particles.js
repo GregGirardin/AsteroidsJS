@@ -100,7 +100,7 @@ export class Torpedo extends WorldObject
     this.ttl--;
     while( this.colList.length )
     {
-      colObj = this.colList.shift();
+      var colObj = this.colList.shift();
 
       if( colObj.o.type == c.OBJECT_TYPE_ASTEROID && colObj.o.iron == true )
       {

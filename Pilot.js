@@ -1,7 +1,7 @@
 
 import { c } from './constants.js';
 import { angleTo, angleNorm, randInt, randFloat } from './Utils.js';
-import { Point, Vector, vectorDiff } from './Vector.js';
+import { Point, Vector, dir, vectorDiff } from './Vector.js';
 
 export class Heuristic
 {
@@ -186,7 +186,7 @@ export class HeuristicAttack
     if( this.attackState == c.ATTACK_ALIGN )
     {
       let sh = false;
-      for( obj of e.objects )
+      for( let obj of e.objects )
       {
         if( obj.type == c.OBJECT_TYPE_SHIP )
         {
@@ -204,7 +204,7 @@ export class HeuristicAttack
       {
         s.cannon = 1; //  cannon handled in update
         this.attackState = c.ATTACK_INIT;
-        this.ttNextAttack = random.randrange( 20, 70 );
+        this.ttNextAttack = randFloat( 20, 70 );
       }
       else
         s.spin = aToGoal / 10;
@@ -217,7 +217,7 @@ export class Pilot
 {
   constructor( parent, hList )
   {
-    this.parent = parent;
+    this.parent = parent; // the ship this is piloting. A WorldObject
     this.hList = hList;
 
     if( this.hList )

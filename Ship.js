@@ -4,6 +4,7 @@ import { Line, Shape } from './Shape.js';
 import { randInt, randFloat } from './Utils.js';
 import { Point, Vector } from './Vector.js';
 import { SmokeParticle, CannonParticle, Torpedo } from './Particles.js';
+import { gManager, gameOver } from './main.js';
 
 export class Ship extends WorldObject
 {
@@ -24,9 +25,9 @@ export class Ship extends WorldObject
 
     this.fireCannon = false;
     this.fireTorpedo = false;
-    this.rounds = 50;
-    this.torpedos = 50;
-    this.fuel = 50.0;
+    this.rounds = c.SHIP_MAX_ROUNDS;
+    this.torpedos = c.SHIP_MAX_TORPEDOS;
+    this.fuel = c.SHIP_MAX_FUEL;
     this.torpedoDelay = 0;
   }
 
@@ -110,8 +111,8 @@ export class Ship extends WorldObject
       let colObj = this.colList.shift();
       if( colObj.o.type == c.OBJECT_TYPE_TANKER )
       {
-        t = colObj.o;
-        if( t.fuel > 0 && this.fuel < 100.0 )
+        let t = colObj.o;
+        if( t.fuel > 0 && this.fuel < c.SHIP_MAX_FUEL )
         {
           this.fuel += 1;
           t.fuel -= 1;
@@ -119,7 +120,7 @@ export class Ship extends WorldObject
         else
           t.transferComplete |= c.TX_RESOURCE_FUEL;
 
-        if( t.rounds > 0 && this.torpedos < 100.0 )
+        if( t.rounds > 0 && this.rounds < c.SHIP_MAX_ROUNDS )
         {
           this.rounds += 1;
           t.rounds -= 1;
@@ -127,7 +128,7 @@ export class Ship extends WorldObject
         else
           t.transferComplete |= c.TX_RESOURCE_ROUNDS;
 
-        if( t.torpedos > 0 && this.torpedos < 100.0 )
+        if( t.torpedos > 0 && this.torpedos < c.SHIP_MAX_TORPEDOS )
         {
           this.torpedos += 1;
           t.torpedos -= 1;
@@ -145,14 +146,14 @@ export class Ship extends WorldObject
       {
         e.numShips -= 1;
         if( e.numShips < 0 )
-          e.events.newEvent( "Game Over man!", c.EVENT_DISPLAY_COUNT * 2, e.gameOver );
+          e.events.newEvent( "Game Over man!", c.EVENT_DISPLAY_COUNT * 2, gameOver );
         for( var ix = 0;ix < randInt( 30, 40 );ix++ )
         {
           let p = new SmokeParticle( new Point( this.p.x, this.p.y ),
                                      new Vector( randFloat( 0, 2 ), c.TAU * randFloat( 0, 1 ) ).add( this.v ),
                                      randInt( 20, 50 ),
                                      randFloat( 3, 3.5 ) );
-          e.addObj( p );
+           e.addObj( p );
         }
         return false;
       }
@@ -172,17 +173,17 @@ export class Ship extends WorldObject
 
     ctx.strokeStyle = ( this.fuel < 20 ) ? "red" : "black";
     ctx.beginPath();
-    ctx.rect( 50, 5, this.fuel * 2, 2 );
+    ctx.rect( 50, 5, this.fuel, 2 );
     ctx.stroke();
   
     ctx.strokeStyle = ( this.rounds < 20 ) ? "red" : "black";
     ctx.beginPath();
-    ctx.rect( 50, 10, 2 * this.rounds, 2 );
+    ctx.rect( 50, 10, this.rounds, 2 );
     ctx.stroke();
   
     ctx.strokeStyle = ( this.torpedos < 20 ) ? "red" : "black";
     ctx.beginPath();
-    ctx.rect( 50, 15, 2 * this.torpedos, 2 );
+    ctx.rect( 50, 15, this.torpedos, 2 );
     ctx.stroke();
   }
 }

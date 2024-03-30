@@ -55,7 +55,7 @@ export class Event
   {
     this.msg = msg;
     this.dur = dur;
-    this.aaction = action; // callback
+    this.action = action; // callback
   }
 }
 
@@ -68,7 +68,7 @@ export class gameEvents
 
   newEvent( msg, dur, action )
   {
-    let ev = new Event( msg, dur, action )
+    let ev = new Event( msg, dur, action );
     this.eventList.push( ev );
   }
 
@@ -92,7 +92,7 @@ export class gameEvents
   {
     if( this.eventList.length > 0 )
     {
-      ev = this.eventList[ 0 ];
+      let ev = this.eventList[ 0 ];
       if( ev.msg )
         e.ctx.fillText( ev.msg, c.SCREEN_WIDTH / 2, c.SCREEN_HEIGHT / 2 );
     }
@@ -103,11 +103,11 @@ export class spawnAble
 {
   constructor( initparams )
   {
-    this.min = initparams[ 0 ];
-    this.max = initparams[ 1 ];
-    this.num = initparams[ 2 ];
-    this.count = initparams[ 3 ];
-    this.newFunc = initparams[ 4 ];
+    this.min = initparams[ 0 ]; // min time until next spawn
+    this.max = initparams[ 1 ]; // max time
+    this.num = initparams[ 2 ]; // how many spawning events in this level
+    this.count = initparams[ 3 ]; // countown until next spawning
+    this.newFunc = initparams[ 4 ]; // function to spawn the thing.
   }
 
   update( e )
@@ -129,6 +129,7 @@ export class spawnAble
 
 export class spawnList
 {
+  // an array of spawnables init params.
   constructor( l )
   {
     this.spawnAbles = [];
@@ -147,7 +148,6 @@ export class spawnList
       if( s.num > 0 )
         done = false; // not done 
     }
-
     return done;
   }
 }

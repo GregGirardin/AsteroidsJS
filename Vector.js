@@ -77,10 +77,10 @@ export class Vector
       this.direction = direct;
     }
 
-    return this;
+    return new Vector( mag, direct );
   }
 
-  adjust( aVec, weight )
+  adjust( aVec, weight ) // aVec is the "goal" vector we want to adjust this vector towards.
   {
     var adx = ( aVec.dx() - this.dx() ) * weight;
     var ady = ( aVec.dy() - this.dy() ) * weight;
@@ -90,8 +90,6 @@ export class Vector
 
     this.magnitude = Math.sqrt( cx ** 2 + cy ** 2 );
     this.direction = dir( cx, cy );
-
-    return this;
   }
 
   dx() { return( this.magnitude * Math.cos( this.direction ) ); }

@@ -9,11 +9,12 @@ class SmallAlien extends WorldObject
 {
   constructor()
   {
-    const s = [ [ -2,-3, 10, 0, false ],
-                [ -2,-3, -2, 3, false ] ];
+    const s = [ [ -4, 5, 10, 0, "black" ],
+                [ -4,-5, 10, 0, "black" ],
+                [ -4, -5, -4, 5, "black" ] ];
 
-    let p = new Point( -c.SCREEN_BUFFER + 1, randFloat( 0, c.SCREEN_HEIGH ) );
-    super( c.OBJECT_TYPE_ALIEN, p, randFloat( -.1, .1 ), new Vector( 0, 0 ), 5, c.SMALL_ALIEN_MASS );
+    let p = new Point( -c.SCREEN_BUFFER + 1, randFloat( 0, c.SCREEN_HEIGHT ) );
+    super( c.OBJECT_TYPE_ALIEN, p, randFloat( -.1, .1 ), new Vector( 0, 0 ), 7, c.SMALL_ALIEN_MASS );
 
     this.shape = new Shape( s );
     this.cannon = 0;
@@ -54,11 +55,11 @@ class SmallAlien extends WorldObject
   update( e )
   {
     super.update( e );
-    this.pilot.pilot( this, e );
+    this.pilot.pilot( e );
     if( this.offScreen() )
       return false;
 
-    if( this.cannon > 0)
+    if( this.cannon > 0 )
     {
       this.cannon--;
       let p = new CannonParticle( new Point( this.p.x + 10 * Math.cos( this.a ),
@@ -76,18 +77,18 @@ class SmallAlien extends WorldObject
           this.v.magnitude = c.SPEED_HI;
         this.p.move( new Vector( colObj.d / 2, colObj.i.direction ) );
       }
-      else if ( colObj.o.type != c.OBJECT_TYPE_NONE )
+      else if( colObj.o.type != c.OBJECT_TYPE_NONE )
       {
         const total = randInt( 10, 20 );
         for( let count = 1;count < total;count++ )
         {
-          p = new SmokeParticle( new Point( this.p.x, this.p.y ),
-                                 new Vector( randFloat( 0, 1 ), randFloat( 0, c.TAU ) ).add( this.v ),
-                                 20 + randFloat( 0, 20 ), randFloat( 2, 2.5 ) );
+          let p = new SmokeParticle( new Point( this.p.x, this.p.y ),
+                                     new Vector( randFloat( 0, 1 ), randFloat( 0, c.TAU ) ).add( this.v ),
+                                     20 + randFloat( 0, 20 ), randFloat( 2, 2.5 ) );
           e.addObj( p );
         }
         let t = colObj.o.type;
-        if( t == OBJECT_TYPE_CANNON || t == OBJECT_TYPE_TORPEDO || t == OBJECT_TYPE_T_CANNON )
+        if( t == c.OBJECT_TYPE_CANNON || t == c.OBJECT_TYPE_TORPEDO || t == c.OBJECT_TYPE_T_CANNON )
           e.score += c.SMALL_ALIEN_POINTS;
         return false;
       }
@@ -116,7 +117,7 @@ class BigAlien extends WorldObject
                 [ -10,-8, 15, 0, "black" ],
                 [ -10,-8,-10, 8, "black" ] ];
 
-    let p = new Point( c.SCREEN_BUFFER + 1, randFloat( 0, c.SCREEN_HEIGHT ) );
+    let p = new Point( -c.SCREEN_BUFFER + 1, randFloat( 0, c.SCREEN_HEIGHT ) );
     super( c.OBJECT_TYPE_ALIEN, p, randFloat( -.1, .1 ), new Vector( 0, 0), 12, c.BIG_ALIEN_MASS );
 
     this.shape = new Shape( s );
@@ -143,7 +144,7 @@ class BigAlien extends WorldObject
 
   update( e )
   {
-    this.pilot.pilot( this, e );
+    this.pilot.pilot( e );
     super.update( e );
     if( this.offScreen() )
       return false;
