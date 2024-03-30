@@ -4,6 +4,7 @@ import { Pilot, Heuristic, HeuristicFace, HeuristicGo, HeuristicAttack, Heuristi
 import { Point, Vector } from './Vector.js';
 import { Shape } from './Shape.js';
 import { SmokeParticle, CannonParticle } from './Particles.js';
+import { gManager } from './main.js';
 
 class SmallAlien extends WorldObject
 {
@@ -52,10 +53,10 @@ class SmallAlien extends WorldObject
     this.pilot = new Pilot( this, hLists[ randInt( 0, 2 ) ] );
   }
 
-  update( e )
+  update()
   {
-    super.update( e );
-    this.pilot.pilot( e );
+    super.update();
+    this.pilot.pilot();
     if( this.offScreen() )
       return false;
 
@@ -65,7 +66,7 @@ class SmallAlien extends WorldObject
       let p = new CannonParticle( new Point( this.p.x + 10 * Math.cos( this.a ),
                                              this.p.y - 10 * Math.sin( this.a ) ),
                                   new Vector( 7, this.a ), 120, c.OBJECT_TYPE_AL_CANNON );
-      e.addObj( p );
+      gManager.addObj( p );
     }
   
     while( this.colList.length )
@@ -85,28 +86,26 @@ class SmallAlien extends WorldObject
           let p = new SmokeParticle( new Point( this.p.x, this.p.y ),
                                      new Vector( randFloat( 0, 1 ), randFloat( 0, c.TAU ) ).add( this.v ),
                                      20 + randFloat( 0, 20 ), randFloat( 2, 2.5 ) );
-          e.addObj( p );
+          gManager.addObj( p );
         }
         let t = colObj.o.type;
         if( t == c.OBJECT_TYPE_CANNON || t == c.OBJECT_TYPE_TORPEDO || t == c.OBJECT_TYPE_T_CANNON )
-          e.score += c.SMALL_ALIEN_POINTS;
+          gManager.score += c.SMALL_ALIEN_POINTS;
         return false;
       }
       if( this.accel > 0 )
       {
         let p = new SmokeParticle( new Point( this.p.x, this.p.y ).move( new Vector( 3, this.a + c.PI ) ),
-                                    new Vector( 2, this.a + c.PI + randFloat( -.25, .25 ) ),
-                                    randFloat( 5, 10 ),
-                                    this.accel * randFloat( 15, 30 ) )
-        e.addObj( p );
+                                   new Vector( 2, this.a + c.PI + randFloat( -.25, .25 ) ),
+                                   randFloat( 5, 10 ),
+                                   this.accel * randFloat( 15, 30 ) )
+
+        gManager.addObj( p );
       }
     }
   }
 
-  draw( ctx )
-  {
-    this.shape.draw( ctx, this.p, this.a );
-  }
+  draw( ctx ) { this.shape.draw( ctx, this.p, this.a, 2 ); }
 }
 
 class BigAlien extends WorldObject
@@ -142,10 +141,10 @@ class BigAlien extends WorldObject
     this.pilot = new Pilot( this, hLists[ randInt( 0, 2 ) ] );
   }
 
-  update( e )
+  update()
   {
-    this.pilot.pilot( e );
-    super.update( e );
+    this.pilot.pilot();
+    super.update();
     if( this.offScreen() )
       return false;
    
@@ -167,37 +166,27 @@ class BigAlien extends WorldObject
           let p = new SmokeParticle( new Point( this.p.x, this.p.y ),
                                      new Vector( randFloat( 0, 1 ), randFloat( 0, c.TAU ) ).add( this.v ),
                                      20 + randFloat( 0, 20 ), randFloat( 2, 2.5 ) );
-          e.addObj( p );
+          gManager.addObj( p );
         }
         let t = colObj.o.type;
         if( t == c.OBJECT_TYPE_CANNON || t == c.OBJECT_TYPE_TORPEDO || t == c.OBJECT_TYPE_T_CANNON )
-          e.score += c.BIG_ALIEN_POINTS;
+          gManager.score += c.BIG_ALIEN_POINTS;
         return false;
       }
 
       if( this.accel > 0 )
       {
-        let p = new SmokeParticle( new Point( this.p.x, this.p.y ).move( new Vector( 7, this.a + c.PI ) ),
+        let p = new SmokeParticle(  new Point( this.p.x, this.p.y ).move( new Vector( 7, this.a + c.PI ) ),
                                     new Vector( 2, this.a + c.PI + randFloat( -.25, .25 ) ),
                                     randFloat( 5, 10 ),
                                     this.accel * randFloat( 15, 30 ) )
-        e.addObj( p );
+        gManager.addObj( p );
       }
     }
   }
 
-  draw( ctx )
-  {
-    this.shape.draw( ctx, this.p, this.a );
-  }
+  draw( ctx ) { this.shape.draw( ctx, this.p, this.a ); }
 }
 
-export function newSmallAlien()
-{
-  return new SmallAlien();
-}
-
-export function newBigAlien()
-{
-  return new BigAlien();
-}
+export function newSmallAlien() { return new SmallAlien(); }
+export function newBigAlien() { return new BigAlien(); }

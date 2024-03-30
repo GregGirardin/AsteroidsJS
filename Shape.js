@@ -44,11 +44,11 @@ export class Shape
     return tlines;
   }
 
-  draw( ctx, p, a, color="black", width=1 )
+  draw( ctx, p, a, width=1, color="black" )
   {
     let tlines = this.translate( p, a )
-    ctx.strokeStyle = 'black';
-
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
     for( let line of tlines )
     {
       ctx.beginPath();
@@ -56,6 +56,8 @@ export class Shape
       ctx.lineTo( line.p2.x, line.p2.y );
       ctx.stroke();
     }
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 1;
   }
 
   move( v )

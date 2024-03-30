@@ -33,7 +33,7 @@ export class Ship extends WorldObject
 
   update( e )
   {
-    super.update( e );
+    super.update();
   
     if( this.accel > 0 )
     {
@@ -67,7 +67,7 @@ export class Ship extends WorldObject
                                  new Vector( 3, this.a + c.PI + randFloat( -.3, .3 ) ),
                                  randInt( 5, 12 ),
                                  this.accel * randInt( 15, 30 ) );
-      e.addObj( p );
+      gManager.addObj( p );
     }
 
     if( this.fireCannon == true && this.rounds > 0 )
@@ -76,7 +76,7 @@ export class Ship extends WorldObject
                                              this.p.y - 10 * Math.sin( this.a ) ),
                                   new Vector( 7, this.a ).add( this.v, true ),
                                   120 );
-      e.addObj( p );
+      gManager.addObj( p );
       this.fireCannon = false;
       this.rounds -= .5;
       if( e.score > c.CANNON_COST )
@@ -97,7 +97,7 @@ export class Ship extends WorldObject
                                        this.p.y - 20 * Math.sin( this.a ) ),
                              new Vector( 7, this.a ).add( this.v ),
                              150 );
-        e.addObj( p );
+        gManager.addObj( p );
         this.torpedos -= 10;
         this.torpedoDelay = c.TORPEDO_DELAY;
         if( e.score > c.TORPEDO_COST )
@@ -153,7 +153,7 @@ export class Ship extends WorldObject
                                      new Vector( randFloat( 0, 2 ), c.TAU * randFloat( 0, 1 ) ).add( this.v ),
                                      randInt( 20, 50 ),
                                      randFloat( 3, 3.5 ) );
-           e.addObj( p );
+           gManager.addObj( p );
         }
         return false;
       }

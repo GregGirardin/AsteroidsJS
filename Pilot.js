@@ -1,7 +1,7 @@
-
 import { c } from './constants.js';
 import { angleTo, angleNorm, randInt, randFloat } from './Utils.js';
 import { Point, Vector, dir, vectorDiff } from './Vector.js';
+import { gManager } from './main.js';
 
 export class Heuristic
 {
@@ -21,7 +21,7 @@ export class HeuristicGo
     this.hDuration = duration;
   }
 
-  update( s, e )
+  update( s )
   {
     if( this.hDuration > 0 )
     {
@@ -43,7 +43,7 @@ export class HeuristicFace
     this.hAngle = angle;
   }
 
-  update( s, e )
+  update( s )
   {
     let dirTo = angleTo( s.a, this.hAngle );
     if( Math.abs( dirTo ) > .05 )
@@ -61,7 +61,7 @@ export class HeuristicFace
 
 export class HeuristicStop
 {
-  update( s, e )
+  update( s )
   {
     if( s.v.magnitude > c.SPEED_SLOW / 20 )
     {
@@ -95,7 +95,7 @@ export class HeuristicGoto
     this.distance = distance;
   }
 
-  update( s, e )
+  update( s )
   {
     let distToTarget = s.p.distanceTo( this.target );
 
@@ -140,7 +140,7 @@ export class HeuristicWait
     this.hDuration = duration;
   }
 
-  update( s, e )
+  update( s )
   {
     s.accel = 0;
     s.spin = 0;
@@ -164,7 +164,7 @@ export class HeuristicAttack
     this.ttNextAttack = 1;
   }
 
-  update( s, e )
+  update( s )
   {
     this.durationCounter--;
     if( this.durationCounter <= 0 )
@@ -186,7 +186,7 @@ export class HeuristicAttack
     if( this.attackState == c.ATTACK_ALIGN )
     {
       let sh = false;
-      for( let obj of e.objects )
+      for( let obj of gManager.objects )
       {
         if( obj.type == c.OBJECT_TYPE_SHIP )
         {
@@ -238,7 +238,7 @@ export class Pilot
     if( this.hList == undefined || this.currentH == undefined )
       return;
 
-    let s = this.currentH.heuristic.update( this.parent, e );
+    let s = this.currentH.heuristic.update( this.parent );
 
     if( s == true )
       for( let h of this.hList )

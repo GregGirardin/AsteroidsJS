@@ -2,6 +2,7 @@ import { c } from './constants.js';
 import { WorldObject, randInt, randFloat } from './Utils.js';
 import { Shape } from './Shape.js';
 import { Point, Vector } from './Vector.js';
+import { gManager } from './main.js';
 
 export class SmokeParticle extends WorldObject
 {
@@ -19,9 +20,9 @@ export class SmokeParticle extends WorldObject
       this.spin = -5;
   }
 
-  update( e )
+  update()
   {
-    super.update( e );
+    super.update();
     if( this.ttl > 0 )
     {
       this.ttl--;
@@ -41,13 +42,13 @@ export class CannonParticle extends WorldObject
 {
   constructor( p, v, ttl, type=c.OBJECT_TYPE_CANNON )
   {
-    super( type, p, 0, v, 2, c.CANNON_MASS, true );
+    super( type, p, 0, v, 4, c.CANNON_MASS, true );
     this.ttl = ttl;
   }
 
   update( e )
   {
-    super.update( e );
+    super.update();
     if( this.ttl > 0 )
       this.ttl--;
     if( this.ttl <= 0 )
@@ -65,9 +66,9 @@ export class CannonParticle extends WorldObject
   
   draw( ctx )
   {
-    let r = this.colRadius + randFloat( -2, 1 );
     ctx.beginPath();
-    ctx.arc ( this.p.x, this.p.y, r, 0, 2 * Math.PI, "black") ;
+    /* Note that the drawn radius is smaller than the collision radius */
+    ctx.arc ( this.p.x, this.p.y, 2  , 0, 2 * Math.PI, "black") ;
     ctx.stroke();
   }
 }
@@ -81,9 +82,9 @@ export class Torpedo extends WorldObject
     this.radius = radius;
     this.age = 0;
   }
-  update( e )
+  update()
   {
-    super.update( e );
+    super.update();
     this.age += 1;
     if( this.age > 20 )
     {
@@ -91,7 +92,7 @@ export class Torpedo extends WorldObject
                                   new Vector( randFloat( 1, 3 ), randFloat( 0, c.TAU ) ).add( this.v ),
                                   randInt( 20, 30 ),
                                   c.OBJECT_TYPE_T_CANNON );
-      e.addObj( p );
+      gManager.addObj( p );
     }
 
     if( this.ttl < 0 )

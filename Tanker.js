@@ -2,10 +2,11 @@
 import { c } from './constants.js';
 import { Point, Vector } from './Vector.js';
 import { Heuristic, HeuristicFace, HeuristicGo, HeuristicStop, HeuristicWait, HeuristicGoto } from './Pilot.js';
-import { WorldObject, angleTo, angleNorm, randInt, randFloat } from './Utils.js';
+import { WorldObject, angleTo, randInt, randFloat } from './Utils.js';
 import { Shape } from './Shape.js';
 import { Pilot } from './Pilot.js';
-import { SmokeParticle, CannonParticle } from './Particles.js';
+import { SmokeParticle } from './Particles.js';
+import { gManager, gameOver } from './main.js';
 
 class Tanker extends WorldObject // Pilot):
 {
@@ -45,10 +46,10 @@ class Tanker extends WorldObject // Pilot):
     this.pilot = new Pilot( this, hList );
     }
 
-  update( e )
+  update()
   {
-    this.pilot.pilot( e );
-    super.update( e );
+    this.pilot.pilot();
+    super.update();
 
     if( this.offScreen() )
       return false;
@@ -57,7 +58,7 @@ class Tanker extends WorldObject // Pilot):
     if( this.refuelComplete == false )
     {
       // check for tractor.
-      for( let obj of e.objects )
+      for( let obj of gManager.objects )
       {
         if( obj.type == c.OBJECT_TYPE_SHIP )
         {
@@ -83,13 +84,13 @@ class Tanker extends WorldObject // Pilot):
                                   new Vector( 2, this.a + c.PI + randFloat( -.25, .25 ) ),
                                   randFloat( 5, 10 ),
                                   this.accel * randFloat( 15, 30 ) );
-      e.addObj( p );
+      gManager.addObj( p );
     }
 
     if( ( this.transferComplete & c.TX_RESOURCE_ALL == c.TX_RESOURCE_ALL ) && ( this.refuelComplete == false ) )
     {
       this.refuelComplete = true;
-      e.events.newEvent( "Refuel Complete", c.EVENT_DISPLAY_COUNT / 2 );
+      gManager.events.newEvent( "Refuel Complete", c.EVENT_DISPLAY_COUNT / 2 );
       let hList = [ new Heuristic( "Depart", undefined,
                                    new HeuristicGoto( new Point( c.SCREEN_WIDTH * 1.1, randFloat( 0, c.SCREEN_HEIGHT ), c.OBJECT_DIST_NEAR ) ) ) ];
       this.pilot.setHlist( hList );
@@ -116,18 +117,18 @@ class Tanker extends WorldObject // Pilot):
                                        new Vector( randFloat( 0, 1 ), randFloat( 0, c.TAU ) ).add( this.v ),
                                        randFloat( 30, 50 ),
                                        randFloat( 3, 3.5 ) );
-            e.addObj( p );
+            gManager.addObj( p );
           }
 
           if( t == c.OBJECT_TYPE_CANNON || t == c.OBJECT_TYPE_TORPEDO || t == c.OBJECT_TYPE_T_CANNON )
-            e.events.newEvent( "You destroyed the SS Vinoski! LOL", c.EVENT_DISPLAY_COUNT );
+            gManager.events.newEvent( "You destroyed the SS Vinoski! LOL", c.EVENT_DISPLAY_COUNT );
           else
-            e.events.newEvent( "Tanker destroyed", c.EVENT_DISPLAY_COUNT / 2 );
+            gManager.events.newEvent( "Tanker destroyed", c.EVENT_DISPLAY_COUNT / 2 );
 
-          if( e.score > c.TANKER_DESTROYED_COST )
-            e.score -= c.TANKER_DESTROYED_COST;
+          if( gManager.score > c.TANKER_DESTROYED_COST )
+            gManager.score -= c.TANKER_DESTROYED_COST;
           else
-            e.score = 0;
+            gManager.score = 0;
 
           return false;
         }

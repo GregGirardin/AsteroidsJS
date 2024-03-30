@@ -1,5 +1,6 @@
 import { c } from './constants.js';
 import { Point, Vector } from './vector.js';
+import { gManager } from './main.js';
 
 export class WorldObject
 {
@@ -26,7 +27,7 @@ export class WorldObject
       return false;
   }
 
-  update( e )
+  update()
   {
     this.a += this.spin;
     if( this.a < 0 )
@@ -94,7 +95,7 @@ export class gameEvents
     {
       let ev = this.eventList[ 0 ];
       if( ev.msg )
-        e.ctx.fillText( ev.msg, c.SCREEN_WIDTH / 2, c.SCREEN_HEIGHT / 2 );
+        gManager.ctx.fillText( ev.msg, c.SCREEN_WIDTH / 2 - ev.msg.length * 5, c.SCREEN_HEIGHT / 2 );
     }
   }
 }
@@ -110,7 +111,7 @@ export class spawnAble
     this.newFunc = initparams[ 4 ]; // function to spawn the thing.
   }
 
-  update( e )
+  update()
   {
     if( this.num > 0 || this.num == -1 )
     {
@@ -119,7 +120,7 @@ export class spawnAble
       {
         this.count = randInt( this.min, this.max );
         let s = this.newFunc();
-        e.addObj( s );
+        gManager.addObj( s );
         if( this.num > 0 )
           this.num--;
       }

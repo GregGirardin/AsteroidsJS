@@ -60,7 +60,7 @@ THRUST_MED : .01 * 2,
 THRUST_HI  : .01 * 3,
 THRUST_MAX : .01 * 8,
 
-MAX_SPIN : .3,
+MAX_SPIN : .2,
 SPIN_DELTA : .025,
 MIN_ASTEROID_RADIUS : 10,
 SMALL_IMPULSE : 8,// # How hard we can hit and survive

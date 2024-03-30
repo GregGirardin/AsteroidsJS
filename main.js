@@ -111,11 +111,11 @@ class gameManager
 
        break;
 
-      case "t":
+      case "f":
         this.ship.fireTorpedo = true;
         break;
 
-      case "n":
+      case "N":
         this.newGame();
         break;
     }
@@ -158,7 +158,7 @@ class gameManager
       
     // spawn
     if( this.gameOn )
-      if( this.spawnList.update( this ) == true )
+      if( this.spawnList.update() == true )
       {
         var checkComplete = true;
         for( obj of this.objects )
@@ -175,7 +175,7 @@ class gameManager
           this.score += c.WAVE_COMP_POINTS * this.wave;
           if( this.wave == c.NUM_WAVES )
           {
-            this.events.newEvent( "Congration. Your winner", c.EVENT_DISPLAY_COUNT * 2, this.gameOver );
+            this.events.newEvent( "Congration. Your winner", c.EVENT_DISPLAY_COUNT * 2, gameOver );
             this.gameOn = false;
           }
           else

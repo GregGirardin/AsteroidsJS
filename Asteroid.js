@@ -2,7 +2,8 @@ import { c } from './constants.js';
 import { WorldObject, randInt, randFloat } from './Utils.js';
 import { Shape } from './Shape.js';
 import { Vector, Point } from './Vector.js';
-import { SmokeParticle, CannonParticle } from './Particles.js';
+import { SmokeParticle } from './Particles.js';
+import { gManager } from './main.js';
 
 export class Asteroid extends( WorldObject )
 {
@@ -54,13 +55,15 @@ export class Asteroid extends( WorldObject )
     this.shape = new Shape( s );
     this.collision = c.OBJECT_TYPE_NONE;
     this.spin = randFloat( -.05, .05 );
-    this.iron = iron;
+    this.iron = iron; // can't destroy, but can move when shooting them.
   }
 
-  update( e )
+  update()
   {
     if( this.offScreen() )
       return false;
+
+    super.update();
 
     while( this.colList.length )
     {
@@ -69,7 +72,8 @@ export class Asteroid extends( WorldObject )
       if( colObj.o.type == c.OBJECT_TYPE_NONE )
         continue;
     
-      if( ( this.iron == true || ( colObj.i.magnitude < colObj.SMALL_IMPULSE && colObj.o.weapon == false ) ) && colObj.o.type != c.OBJECT_TYPE_BH ) 
+      if( ( this.iron == true || 
+          ( colObj.i.magnitude < colObj.SMALL_IMPULSE && colObj.o.weapon == false ) ) && colObj.o.type != c.OBJECT_TYPE_BH ) 
       {
         this.v.add( colObj.i, true );
         if( this.v.magnitide > c.SPEED_HI )
@@ -84,7 +88,7 @@ export class Asteroid extends( WorldObject )
                                      new Vector( randFloat( 0, 2 ), randFloat( 0, c.TAU ) ),
                                      randInt( 10, 20 ),
                                      randInt( 3, 10 ));
-          e.addObj( p );
+          gManager.addObj( p );
         }
   
         if( this.colRadius > c.MIN_ASTEROID_RADIUS * 2 )
@@ -98,23 +102,21 @@ export class Asteroid extends( WorldObject )
             a.p.x = this.p.x + r * Math.cos( vector + v[ ix ] );
             a.p.y = this.p.y + r * Math.sin( vector + v[ ix ] );
             a.velocity = new Vector( this.v.magnitide * 1.5, this.v.direction + v[ ix ] );
-            e.addObj( a );
+            gManager.addObj( a );
           }
         }
         let t = colObj.o.type;
         if( t == c.OBJECT_TYPE_CANNON || t == c.OBJECT_TYPE_T_CANNON || t == c.OBJECT_TYPE_TORPEDO )
-          e.score += c.ASTEROID_POINTS
+          gManager.score += c.ASTEROID_POINTS
         return false
        }
      }
-     super.update( e );
      return true;
    }
 
   draw( ctx )
   {
-    //let width = ( this.iron == true ) ? 3 : 1;
-    this.shape.draw( ctx, this.p, this.a );
+    this.shape.draw( ctx, this.p, this.a, ( this.iron == true ) ? 3 : 1 );
   }
 }
 
@@ -139,17 +141,17 @@ export class Blackhole extends WorldObject
     this.collision = c.OBJECT_TYPE_NONE;
   }
 
-  update( e )
+  update()
   {
     if( this.offScreen() )
       return false;
 
-    super.update( e );
+    super.update();
 
     while( this.colList.length )
       this.colList.shift(); // BH doesn't care, just clear the list.
 
-    for( let obj of e.objects )
+    for( let obj of gManager.objects )
       if( obj != this )
       {
         let dis = obj.p.distanceTo( this.p );
