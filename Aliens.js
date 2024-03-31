@@ -21,34 +21,34 @@ class SmallAlien extends WorldObject
     this.cannon = 0;
 
     const hLists =
-      [
-        [ // randomly flys among a few new Points, stopping to shoot.
-          new Heuristic( "1", "1a", new HeuristicGotoRandom() ),
-          new Heuristic( "1a", "2", new HeuristicAttack( 100 ) ),
-          new Heuristic( "2", "2a", new HeuristicGotoRandom() ),
-          new Heuristic( "2a", "3", new HeuristicAttack( randFloat( 100, 300 ) ) ),
-          new Heuristic( "3", "3a", new HeuristicGotoRandom() ),
-          new Heuristic( "3a", "1", new HeuristicAttack( 100 ) ),
-        ],
-        [ // this one flys around forever and shoots at you
-          new Heuristic( "1", "1a", new HeuristicGoto( new Point( c.swh, c.shl ), c.OBJECT_DIST_MED ) ),
-          new Heuristic( "1a", "2", new HeuristicAttack( 100 ) ),
-          new Heuristic( "2", "2a", new HeuristicGoto( new Point( c.swl, c.shl ), c.OBJECT_DIST_MED ) ),
-          new Heuristic( "2a", "3", new HeuristicAttack( 100 ) ),
-          new Heuristic( "3", "3a", new HeuristicGoto( new Point( c.swh, c.shh ), c.OBJECT_DIST_MED ) ),
-          new Heuristic( "3a", "4", new HeuristicAttack( 100 ) ),
-          new Heuristic( "4", "4a", new HeuristicGoto( new Point( c.swl, c.shh ), c.OBJECT_DIST_MED ) ),
-          new Heuristic( "4a", "1", new HeuristicAttack( 100 ) ),
-        ],
-        [ // This one flys across this screen but shoots at you at a couple new Points.
-          new Heuristic( "1",  "2", new HeuristicGoto( new Point( c.swl, randFloat( c.shl, c.shh ) ), c.OBJECT_DIST_MED ) ),
-          new Heuristic( "2", "2a", new HeuristicGoto( new Point( c.SCREEN_WIDTH * .5, randFloat( c.shl, c.shh ) ), c.OBJECT_DIST_MED ) ),
-          new Heuristic( "2a", "3", new HeuristicAttack( 300 ) ),
-          new Heuristic( "3", "3a", new HeuristicGoto( new Point( c.swh, randFloat( c.shl, c.shh ) ), c.OBJECT_DIST_MED ) ),
-          new Heuristic( "3a", "4", new HeuristicAttack( 300 ) ),
-          new Heuristic( "4", undefined, new HeuristicGoto( new Point( c.SCREEN_WIDTH * 1.5, randFloat( 0, c.SCREEN_HEIGHT ) ), c.OBJECT_DIST_FAR ) )
-        ]
-      ];
+    [
+      [ // randomly flys among a few new Points, stopping to shoot.
+        new Heuristic( "1", "1a", new HeuristicGotoRandom() ),
+        new Heuristic( "1a", "2", new HeuristicAttack( 100 ) ),
+        new Heuristic( "2", "2a", new HeuristicGotoRandom() ),
+        new Heuristic( "2a", "3", new HeuristicAttack( randFloat( 100, 300 ) ) ),
+        new Heuristic( "3", "3a", new HeuristicGotoRandom() ),
+        new Heuristic( "3a", "1", new HeuristicAttack( 100 ) ),
+      ],
+      [ // this one flys around forever and shoots at you
+        new Heuristic( "1", "1a", new HeuristicGoto( new Point( c.swh, c.shl ), c.OBJECT_DIST_MED ) ),
+        new Heuristic( "1a", "2", new HeuristicAttack( 100 ) ),
+        new Heuristic( "2", "2a", new HeuristicGoto( new Point( c.swl, c.shl ), c.OBJECT_DIST_MED ) ),
+        new Heuristic( "2a", "3", new HeuristicAttack( 100 ) ),
+        new Heuristic( "3", "3a", new HeuristicGoto( new Point( c.swh, c.shh ), c.OBJECT_DIST_MED ) ),
+        new Heuristic( "3a", "4", new HeuristicAttack( 100 ) ),
+        new Heuristic( "4", "4a", new HeuristicGoto( new Point( c.swl, c.shh ), c.OBJECT_DIST_MED ) ),
+        new Heuristic( "4a", "1", new HeuristicAttack( 100 ) ),
+      ],
+      [ // This one flys across this screen but shoots at you at a couple new Points.
+        new Heuristic( "1",  "2", new HeuristicGoto( new Point( c.swl, randFloat( c.shl, c.shh ) ), c.OBJECT_DIST_MED ) ),
+        new Heuristic( "2", "2a", new HeuristicGoto( new Point( c.SCREEN_WIDTH * .5, randFloat( c.shl, c.shh ) ), c.OBJECT_DIST_MED ) ),
+        new Heuristic( "2a", "3", new HeuristicAttack( 300 ) ),
+        new Heuristic( "3", "3a", new HeuristicGoto( new Point( c.swh, randFloat( c.shl, c.shh ) ), c.OBJECT_DIST_MED ) ),
+        new Heuristic( "3a", "4", new HeuristicAttack( 300 ) ),
+        new Heuristic( "4", undefined, new HeuristicGoto( new Point( c.SCREEN_WIDTH * 1.5, randFloat( 0, c.SCREEN_HEIGHT ) ), c.OBJECT_DIST_FAR ) )
+      ]
+    ];
   
     this.pilot = new Pilot( this, hLists[ randInt( 0, 2 ) ] );
   }
@@ -59,6 +59,15 @@ class SmallAlien extends WorldObject
     this.pilot.pilot();
     if( this.offScreen() )
       return false;
+
+    if( this.accel > c.THRUST_LOW )
+    {
+      let p = new SmokeParticle( new Point( this.p.x, this.p.y ).move( new Vector( 3, this.a + c.PI ) ),
+                                 new Vector( 3, this.a + c.PI + randFloat( -.3, .3 ) ),
+                                 randInt( 5, 12 ),
+                                 this.accel * randInt( 15, 30 ) );
+      gManager.addObj( p );
+    }
 
     if( this.cannon > 0 )
     {
@@ -105,7 +114,11 @@ class SmallAlien extends WorldObject
     }
   }
 
-  draw( ctx ) { this.shape.draw( ctx, this.p, this.a, 2 ); }
+  draw( ctx )
+  {
+    this.pilot.draw(); // debug
+    this.shape.draw( ctx, this.p, this.a, 2 );
+  }
 }
 
 class BigAlien extends WorldObject
@@ -148,6 +161,13 @@ class BigAlien extends WorldObject
     if( this.offScreen() )
       return false;
    
+    if( this.accel > c.THRUST_LOW )
+    {
+      let p = new SmokeParticle( new Point( this.p.x, this.p.y ).move( new Vector( 8, this.a + c.PI ) ),
+                                  new Vector( 3, this.a + c.PI + randFloat( -.3, .3 ) ), randInt( 5, 12 ), this.accel * randInt( 15, 30 ) );
+      gManager.addObj( p );
+    }
+
     while( this.colList.length )
     {
       let colObj = this.colList.shift();
@@ -185,7 +205,11 @@ class BigAlien extends WorldObject
     }
   }
 
-  draw( ctx ) { this.shape.draw( ctx, this.p, this.a ); }
+  draw( ctx )
+  {
+     this.pilot.draw(); // debug
+     this.shape.draw( ctx, this.p, this.a );
+  }
 }
 
 export function newSmallAlien() { return new SmallAlien(); }

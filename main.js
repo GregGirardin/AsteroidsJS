@@ -93,7 +93,7 @@ class gameManager
 
       case "ArrowDown":
         this.ship.accel = 0;
-        this.ship.v.magnitude *= .5; // decelerate fairly quickly.
+        this.ship.v.magnitude *= .75;
         break;
 
       case " ":
@@ -169,6 +169,7 @@ class gameManager
             break;
           }
         }
+
         if( checkComplete == true )
         {
           this.waveComplete = true;
@@ -256,12 +257,5 @@ function gameInit()
   window.requestAnimationFrame( gameLoop );
 }
 
-function sleep( ms )
-{
-  return new Promise( resolve => setTimeout( resolve, ms ) );
-}
-
-export function gameOver()
-{
-  gManager.gameOver();
-}
+function sleep( ms ) { return new Promise( resolve => setTimeout( resolve, ms ) ); }
+export function gameOver() { gManager.gameOver(); }

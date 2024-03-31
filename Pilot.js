@@ -87,6 +87,7 @@ export class HeuristicStop
   }
 }
 
+// this works pretty well but cheats using drag to keep from overshooting targets.
 export class HeuristicGoto
 {
   constructor( target, distance )
@@ -125,6 +126,79 @@ export class HeuristicGoto
   s.v.magnitude *= .99;
 
   return false;
+  }
+}
+
+// Goto a target with a slightly different algoritm.
+// 1) stop
+// 2) face target
+// 3) accelerate to target
+// 4) if not facing target goto 1
+
+export class HeuristicStopFaceGoto
+{
+  constructor( target, distance )
+  {
+    this.target = target;
+    this.distance = distance;
+    this.stopping = false;
+    // for simplicity, this heuristic stops the ship, then points to the target, then accellerates that way
+    // dynamically adjusting a moving ship to hit a target is a future exercise.
+  }
+
+  update( s )
+  {
+    s.accel = 0;
+    s.spin = 0;
+
+    let distToTarget = s.p.distanceTo( this.target );
+    let dirToTarget = s.p.directionTo( this.target );
+    let dirTo = angleTo( s.a, dirToTarget );
+
+    // see if we're at the target
+    if( ( distToTarget < c.OBJECT_DIST_FAR ) &&
+        ( ( this.distance == c.OBJECT_DIST_FAR ) ||
+          ( ( distToTarget < c.OBJECT_DIST_MED && this.distance == c.OBJECT_DIST_MED ) ||
+          ( distToTarget < c.OBJECT_DIST_NEAR ) ) ) )
+      return true;
+
+    if( this.stopping )
+    {
+      if( s.v.magnitude > c.SPEED_SLOW / 20 )
+      {
+        // turn around
+        let targetDir = angleNorm( s.v.direction + c.PI );
+        let dirTo = angleTo( s.a, targetDir );
+        if( Math.abs( dirTo ) > .05 )
+          s.spin = dirTo / 20;
+        else // ok, we're turned around. Thrust on to decelerate.
+          s.accel = c.THRUST_HI;
+        return false;
+      }
+  
+      // we're not moving, but need to accurately face target first.
+      if( Math.abs( dirTo ) > .05 )
+      {
+        s.spin = dirTo / 20;
+        return false;
+      }
+
+      this.stopping = false;
+    }
+ 
+    // make sure we're still generally facing the target
+    if( Math.abs( dirTo ) > .3 )
+    {
+      // not facing towards the target very well, stop.
+      this.stopping = true;
+      return false;
+    }
+
+    // ok, facing the target. Thrust high until we're moving.
+    if( s.v.magnitude < c.SPEED_MED )
+      s.accel = c.THRUST_HI;
+
+    return false;
   }
 }
 
@@ -232,7 +306,7 @@ export class Pilot
     this.currentH = hList[ 0 ];
   }
 
-  pilot( e )
+  pilot()
   {
     // Adjust, thrust, direction, and cannon based on heuristics.
     if( this.hList == undefined || this.currentH == undefined )
@@ -247,5 +321,21 @@ export class Pilot
           this.currentH = h;
           break;
         }
+  }
+
+  draw()
+  {
+    return; // this is only for debug
+    if( this.currentH.heuristic.target )
+    {
+        let t = this.currentH.heuristic.target ;
+        gManager.ctx.beginPath();
+        /* Note that the drawn radius is smaller than the collision radius */
+        gManager.ctx.fillStyle = "orange";
+        gManager.ctx.moveTo( this.parent.p.x, this.parent.p.y );
+        gManager.ctx.lineTo( t.x, t.y );
+        gManager.ctx.stroke();
+        gManager.ctx.fillStyle = "black";
+    }
   }
 }

@@ -32,7 +32,7 @@ export class SmokeParticle extends WorldObject
       return false;
   }
 
-  draw( ctx ) { this.shape.draw( ctx, this.p, this.a ); }
+  draw( ctx ){ this.shape.draw( ctx, this.p, this.a ); }
 }
 
 export class CannonParticle extends WorldObject
@@ -46,8 +46,7 @@ export class CannonParticle extends WorldObject
   update( e )
   {
     super.update();
-    if( this.ttl > 0 )
-      this.ttl--;
+    this.ttl--;
     if( this.ttl <= 0 )
       return false;
 
@@ -55,7 +54,7 @@ export class CannonParticle extends WorldObject
     {
       let colObj = this.colList.shift();
       let t = colObj.o.type;
-      // if( t == c.OBJECT_TYPE_TORPEDO || t == c.OBJECT_TYPE_NONE || t == c.OBJECT_TYPE_CANNON )
+
       let count = randInt( 6, 10 );
       for( let v = 1;v < count;v++ )
       {
@@ -74,7 +73,7 @@ export class CannonParticle extends WorldObject
   {
     ctx.beginPath();
     /* Note that the drawn radius is smaller than the collision radius */
-    ctx.arc ( this.p.x, this.p.y, 2  , 0, 2 * Math.PI, "black") ;
+    ctx.arc ( this.p.x, this.p.y, 1, 0, 2 * Math.PI ) ;
     ctx.stroke();
   }
 }
@@ -88,6 +87,7 @@ export class Torpedo extends WorldObject
     this.radius = radius;
     this.age = 0;
   }
+
   update()
   {
     super.update();
@@ -105,26 +105,38 @@ export class Torpedo extends WorldObject
       return false;
 
     this.ttl--;
+
+    let alive = true;
+
     while( this.colList.length )
     {
       var colObj = this.colList.shift();
 
       if( colObj.o.type == c.OBJECT_TYPE_ASTEROID && colObj.o.iron == true )
       {
-        this.v.add( colObj.i, true );
-        if( this.v.magnitude > c.SPEED_HI )
-          this.v.magnitude = c.SPEED_HI;
-        this.p.move( new Vector( colObj.d / 2, colObj.i.direction ) );
+        this.p.move( new Vector( colObj.d / 2, colObj.i.direction ) ); // push the iron asteroid a bit
+
+        let count = randInt( 6, 12 );
+        for( let v = 1;v < count;v++ )
+        {
+          let p = new SmokeParticle( new Point( this.p.x, this.p.y ),
+                                     new Vector( randFloat( 0, 2 ), randFloat( 0, c.TAU ) ),
+                                     randInt( 10, 20 ),
+                                     randInt( 3, 10 ));
+          gManager.addObj( p );
+        }
+
+        alive = false;
       }
     }
-    return true;
+    return alive;
   }
 
   draw( ctx )
   {
     let r = this.radius + randFloat( -2, 1 );
     ctx.beginPath();
-    ctx.arc ( this.p.x, this.p.y, r, 0, 2 * Math.PI, "black");
+    ctx.arc ( this.p.x, this.p.y, r, 0, 2 * Math.PI );
     ctx.stroke();
   }
 }
