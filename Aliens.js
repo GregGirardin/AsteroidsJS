@@ -6,7 +6,7 @@ import { Shape } from './Shape.js';
 import { SmokeParticle, CannonParticle } from './Particles.js';
 import { gManager } from './main.js';
 
-class SmallAlien extends WorldObject
+export class SmallAlien extends WorldObject
 {
   constructor()
   {
@@ -94,14 +94,14 @@ class SmallAlien extends WorldObject
     }
   }
 
-  draw( ctx )
+  draw( )
   {
     this.pilot.draw(); // debug
-    this.shape.draw( ctx, this.p, this.a, 2 );
+    this.shape.draw( this.p, this.a, 2 );
   }
 }
 
-class BigAlien extends WorldObject
+export class BigAlien extends WorldObject
 {
   constructor()
   {
@@ -186,10 +186,10 @@ class BigAlien extends WorldObject
     }
   }
 
-  draw( ctx )
+  draw( )
   {
      this.pilot.draw(); // debug
-     this.shape.draw( ctx, this.p, this.a );
+     this.shape.draw( this.p, this.a );
   }
 }
 

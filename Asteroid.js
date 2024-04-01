@@ -114,9 +114,9 @@ export class Asteroid extends( WorldObject )
      return true;
    }
 
-  draw( ctx )
+  draw()
   {
-    this.shape.draw( ctx, this.p, this.a, ( this.iron == true ) ? 3 : 1 );
+    this.shape.draw( this.p, this.a, ( this.iron == true ) ? 3 : 1 );
   }
 }
 
@@ -127,9 +127,10 @@ export function newAsteroid()
 
 export class Blackhole extends WorldObject
 {
-  constructor()
+  constructor( radius )
   {
-    let radius = randInt( 20, 50 );
+    if (!radius) 
+      radius = randInt( 20, 50 );
     super( c.OBJECT_TYPE_BH,
            new Point( -5, randInt( c.SCREEN_HEIGHT * .2, c.SCREEN_HEIGHT * .8 ) ),
            0,
@@ -166,11 +167,11 @@ export class Blackhole extends WorldObject
     return true;
   }
 
-  draw( ctx )
+  draw( )
   {
-    ctx.beginPath();
-    ctx.arc ( this.p.x, this.p.y, this.colRadius, 0, 2 * Math.PI, "black" ) ;
-    ctx.fill();
+    gManager.ctx.beginPath();
+    gManager.ctx.arc ( this.p.x, this.p.y, this.colRadius, 0, 2 * Math.PI, "black" ) ;
+    gManager.ctx.fill();
   }
 }
 

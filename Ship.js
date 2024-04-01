@@ -147,29 +147,29 @@ export class Ship extends WorldObject
     }
   }
 
-  draw( ctx )
+  draw()
   {
-    this.shape.draw( ctx, this.p, this.a );
-    ctx.strokeStyle = "black";
+    this.shape.draw( this.p, this.a );
+    let g = gManager.ctx;
   
-    ctx.strokeStyle = "black";
-    ctx.beginPath();
-    ctx.rect( 50, 5, 100, 10 );
-    ctx.stroke();
+    g.strokeStyle = "black";
+    g.beginPath();
+    g.rect( 50, 5, 100, 10 );
+    g.stroke();
 
-    ctx.strokeStyle = ( this.fuel < 20 ) ? "red" : "black";
-    ctx.beginPath();
-    ctx.rect( 50, 5, this.fuel, 2 );
-    ctx.stroke();
+    g.strokeStyle = ( this.fuel < 20 ) ? "red" : "black";
+    g.beginPath();
+    g.rect( 50, 5, this.fuel, 2 );
+    g.stroke();
   
-    ctx.strokeStyle = ( this.rounds < 20 ) ? "red" : "black";
-    ctx.beginPath();
-    ctx.rect( 50, 10, this.rounds, 2 );
-    ctx.stroke();
+    g.strokeStyle = ( this.rounds < 20 ) ? "red" : "black";
+    g.beginPath();
+    g.rect( 50, 10, this.rounds, 2 );
+    g.stroke();
   
-    ctx.strokeStyle = ( this.torpedos < 20 ) ? "red" : "black";
-    ctx.beginPath();
-    ctx.rect( 50, 15, this.torpedos, 2 );
-    ctx.stroke();
+    g.strokeStyle = ( this.torpedos < 20 ) ? "red" : "black";
+    g.beginPath();
+    g.rect( 50, 15, this.torpedos, 2 );
+    g.stroke();
   }
 }

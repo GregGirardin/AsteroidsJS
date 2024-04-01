@@ -12,7 +12,7 @@ window.onload = gameInit;
 /* min time until next, max time, number of events, count to first spawn, constructor */
 let spawnParams = [ [ 2000, 5000, -1, 2000, newBlackhole ], // -1 means can spawn forever but don't affect level complete
                     [ 1000, 2000, -1, 1200, newTanker ],
-                    [  150,  300,  0,    0, newAsteroid ],
+                    [  150,  300,  0,  100, newAsteroid ],
                     [  400,  800,  0,  500, newBigAlien ],
                     [  200,  800,  0, 1000, newSmallAlien ] ];
 
@@ -79,26 +79,32 @@ class gameManager
     switch( param.key )
     {
       case "ArrowLeft":
-        if( this.ship.spin < 0 )
-          this.ship.spin = 0;
-        else if( this.ship.spin < c.MAX_SPIN )
-          this.ship.spin += c.SPIN_DELTA;
+        if( this.ship )
+          if( this.ship.spin < 0 )
+            this.ship.spin = 0;
+          else if( this.ship.spin < c.MAX_SPIN )
+            this.ship.spin += c.SPIN_DELTA;
         break;
 
       case "ArrowRight":
-        if( this.ship.spin > 0 )
-          this.ship.spin = 0;
-        else if( this.ship.spin > -1 * c.MAX_SPIN )
-          this.ship.spin -= c.SPIN_DELTA;
+        if( this.ship )
+          if( this.ship.spin > 0 )
+            this.ship.spin = 0;
+          else if( this.ship.spin > -1 * c.MAX_SPIN )
+            this.ship.spin -= c.SPIN_DELTA;
         break;
 
       case "ArrowUp":
-        this.ship.accel += .03;
+        if( this.ship )
+          this.ship.accel += .03;
         break;
 
       case "ArrowDown":
-        this.ship.accel = 0;
-        this.ship.v.magnitude *= .75;
+        if( this.ship )
+        {
+          this.ship.accel = 0;
+          this.ship.v.magnitude *= .75;
+        }
         break;
 
       case " ":
@@ -119,7 +125,8 @@ class gameManager
        break;
 
       case "f":
-        this.ship.fireTorpedo = true;
+        if( this.ship )
+          this.ship.fireTorpedo = true;
         break;
 
       case "?":
@@ -231,7 +238,7 @@ class gameManager
     this.ctx.fillText(  "High:" + this.highScore, c.SCREEN_WIDTH *  .7, 15 );
     this.ctx.fillText(  "Wave:" + this.wave,      c.SCREEN_WIDTH * .25, 15 );
 
-    this.events.draw( this );
+    this.events.draw( );
   }
 
   loop( deltaMs ) // The game loop

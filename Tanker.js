@@ -6,9 +6,9 @@ import { WorldObject, angleTo, randInt, randFloat } from './Utils.js';
 import { Shape } from './Shape.js';
 import { Pilot } from './Pilot.js';
 import { SmokeParticle } from './Particles.js';
-import { gManager, gameOver } from './main.js';
+import { gManager } from './main.js';
 
-class Tanker extends WorldObject // Pilot):
+export class Tanker extends WorldObject
 {
   constructor()
   {
@@ -138,17 +138,17 @@ class Tanker extends WorldObject // Pilot):
     return true;
   }
 
-  draw( ctx )
+  draw()
   {
-    this.shape.draw( ctx, this.p, this.a );
+    this.shape.draw( this.p, this.a );
 
     if( this.tPoint )
     {
-      ctx.beginPath();
-      ctx.strokeStyle = 'green';
-      ctx.moveTo( this.p.x, this.p.y );
-      ctx.lineTo( this.tPoint.x + randFloat( -2, 2 ), this.tPoint.y + randFloat( -2, 2 ) );
-      ctx.stroke();
+      gManager.ctx.beginPath();
+      gManager.ctx.strokeStyle = 'green';
+      gManager.ctx.moveTo( this.p.x, this.p.y );
+      gManager.ctx.lineTo( this.tPoint.x + randFloat( -2, 2 ), this.tPoint.y + randFloat( -2, 2 ) );
+      gManager.ctx.stroke();
     }
   }
 }

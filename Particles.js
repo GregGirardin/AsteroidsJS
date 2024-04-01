@@ -32,7 +32,10 @@ export class SmokeParticle extends WorldObject
       return false;
   }
 
-  draw( ctx ){ this.shape.draw( ctx, this.p, this.a ); }
+  draw()
+  {
+    this.shape.draw( this.p, this.a );
+  }
 }
 
 export class CannonParticle extends WorldObject
@@ -69,12 +72,12 @@ export class CannonParticle extends WorldObject
     return true;
   }
   
-  draw( ctx )
+  draw( )
   {
-    ctx.beginPath();
+    gManager.ctx.beginPath();
     /* Note that the drawn radius is smaller than the collision radius */
-    ctx.arc ( this.p.x, this.p.y, 1, 0, 2 * Math.PI ) ;
-    ctx.stroke();
+    gManager.ctx.arc ( this.p.x, this.p.y, 1, 0, 2 * Math.PI ) ;
+    gManager.ctx.stroke();
   }
 }
 
@@ -132,11 +135,11 @@ export class Torpedo extends WorldObject
     return alive;
   }
 
-  draw( ctx )
+  draw( )
   {
     let r = this.radius + randFloat( -2, 1 );
-    ctx.beginPath();
-    ctx.arc ( this.p.x, this.p.y, r, 0, 2 * Math.PI );
-    ctx.stroke();
+    gManager.ctx.beginPath();
+    gManager.ctx.arc ( this.p.x, this.p.y, r, 0, 2 * Math.PI );
+    gManager.ctx.stroke();
   }
 }
