@@ -25,7 +25,7 @@ class SmallAlien extends WorldObject
       [
         new Heuristic( "1", "2", new HeuristicGoto( new Point( c.SCREEN_WIDTH * randFloat( .3, .7 ), c.SCREEN_HEIGHT * randFloat( .3, .7 ) ), c.OBJECT_DIST_MED ) ),
         new Heuristic( "2", "3", new HeuristicStop( c.SPEED_SLOW ) ),
-        new Heuristic( "3", "4", new HeuristicAttack( 50 ) ),
+        new Heuristic( "3", "4", new HeuristicAttack( 100 ) ),
         new Heuristic( "4", "2", new HeuristicGotoRandom( c.OBJECT_DIST_MED ) ),
       ]
     ];
@@ -118,7 +118,7 @@ class BigAlien extends WorldObject
       [
         new Heuristic(  "1",  "2", new HeuristicGoto( new Point( c.SCREEN_WIDTH * randFloat( .2, .8 ), c.SCREEN_HEIGHT * randFloat( .2, .8 ) ), c.OBJECT_DIST_MED ) ),
         new Heuristic(  "2",  "3", new HeuristicStop( c.SPEED_SLOW ) ),
-        new Heuristic(  "3", "3b", new HeuristicAttack( 50 ) ),
+        new Heuristic(  "3", "3b", new HeuristicAttack( 250 ) ),
         new Heuristic( "3b", "3c", new HeuristicAttack( 50 ) ),
         new Heuristic( "3c",  "4", new HeuristicAttack( 50 ) ),
         new Heuristic(  "4",  "2", new HeuristicGotoRandom( c.SCREEN_WIDTH / 4 ) ),

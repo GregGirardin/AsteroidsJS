@@ -5,6 +5,7 @@ import { newTanker } from './Tanker.js';
 import { newBigAlien, newSmallAlien } from './Aliens.js';
 import { spawnList, CollisionObject, gameEvents } from './Utils.js';
 import { newAsteroid, newBlackhole } from './Asteroid.js';
+import { Instructions } from './Instructions.js';
 
 export let gManager; // a single global instance. Everything uses this.
 window.onload = gameInit;
@@ -28,6 +29,9 @@ class gameManager
     this.highScore = 0;
     this.events = new gameEvents();
     this.gameOn = false;
+    this.instructions = new Instructions();
+    this.displayInstructions = true;
+
     this.newGame();
   }
 
@@ -98,6 +102,8 @@ class gameManager
         break;
 
       case " ":
+        if( this.displayInstructions )
+          this.displayInstructions = false;
         let shipPresent = false;
         for( let obj of this.objects )
           if( obj.type == c.OBJECT_TYPE_SHIP )
@@ -114,6 +120,10 @@ class gameManager
 
       case "f":
         this.ship.fireTorpedo = true;
+        break;
+
+      case "?":
+        this.displayInstructions = this.displayInstructions ? false : true;
         break;
 
       case "N":
@@ -226,15 +236,20 @@ class gameManager
 
   loop( deltaMs ) // The game loop
   {
-    if( this.respawn == true )
+    if( this.displayInstructions )
+      this.instructions.draw();
+    else
     {
-      this.respawn = false;
-      this.ship = new Ship();
-      this.addObj( this.ship );
-    }
+      if( this.respawn == true )
+      {
+        this.respawn = false;
+        this.ship = new Ship();
+        this.addObj( this.ship );
+      }
 
-    this.update( deltaMs );
-    this.draw();
+      this.update( deltaMs );
+      this.draw();
+    }
   }
 }
 
