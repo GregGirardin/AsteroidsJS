@@ -1,6 +1,6 @@
 import { c } from './constants.js';
-import { WorldObject, randInt, randFloat } from "./Utils.js";
-import { Pilot, Heuristic, HeuristicGotoRandom, HeuristicStop, HeuristicGo, HeuristicAttack, HeuristicGoto } from "./Pilot.js";
+import { WorldObject, randInt, randFloat } from './Utils.js';
+import { Pilot, Heuristic, HeuristicGotoRandom, HeuristicStop, HeuristicAttack, HeuristicGoto } from './Pilot.js';
 import { Point, Vector } from './Vector.js';
 import { Shape } from './Shape.js';
 import { SmokeParticle, CannonParticle } from './Particles.js';

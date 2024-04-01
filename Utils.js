@@ -1,5 +1,5 @@
 import { c } from './constants.js';
-import { Point, Vector } from './vector.js';
+import { Vector } from './vector.js';
 import { gManager } from './main.js';
 
 export class WorldObject
