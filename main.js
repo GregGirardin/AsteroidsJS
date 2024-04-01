@@ -8,13 +8,12 @@ import { newAsteroid, newBlackhole } from './Asteroid.js';
 
 export let gManager; // a single global instance. Everything uses this.
 window.onload = gameInit;
-
-let spawnParams = [ [ 1000, 5000, -1, 2000, newBlackhole ], // -1 means can spawn forever but don't affect level complete
-                    [ 1200, 2000, -1, 1200, newTanker ],
-                    [  150,  220,  0,    0, newAsteroid ],
-                    [  200,  300,  0,  500, newBigAlien ],
-                    [  200,  300,  0, 1000, newSmallAlien ]
-                    ];
+/* min time until next, max time, number of events, count to first spawn, constructor */
+let spawnParams = [ [ 2000, 5000, -1, 2000, newBlackhole ], // -1 means can spawn forever but don't affect level complete
+                    [ 1000, 2000, -1, 1200, newTanker ],
+                    [  150,  300,  0,    0, newAsteroid ],
+                    [  400,  800,  0,  500, newBigAlien ],
+                    [  200,  800,  0, 1000, newSmallAlien ] ];
 
 class gameManager
 {
@@ -46,9 +45,11 @@ class gameManager
   {
     this.wave = wave;
     this.waveComplete = false
+
     spawnParams[ 2 ][ 2 ] = wave * 15;
     spawnParams[ 3 ][ 2 ] = wave * 10;
     spawnParams[ 4 ][ 2 ] = wave * 7;
+
     this.spawnList = new spawnList( spawnParams );
   }
 

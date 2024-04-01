@@ -1,6 +1,6 @@
 import { c } from './constants.js';
 import { WorldObject, randInt, randFloat } from "./Utils.js";
-import { Pilot, Heuristic, HeuristicFace, HeuristicGo, HeuristicAttack, HeuristicGoto, HeuristicGotoRandom } from "./Pilot.js";
+import { Pilot, Heuristic, HeuristicGotoRandom, HeuristicStop, HeuristicGo, HeuristicAttack, HeuristicGoto } from "./Pilot.js";
 import { Point, Vector } from './Vector.js';
 import { Shape } from './Shape.js';
 import { SmokeParticle, CannonParticle } from './Particles.js';
@@ -10,47 +10,27 @@ class SmallAlien extends WorldObject
 {
   constructor()
   {
-    const s = [ [ -4, 5, 10, 0, "black" ],
-                [ -4,-5, 10, 0, "black" ],
+    const s = [ [ -4,  5, 10, 0, "black" ],
+                [ -4, -5, 10, 0, "black" ],
                 [ -4, -5, -4, 5, "black" ] ];
 
     let p = new Point( -c.SCREEN_BUFFER + 1, randFloat( 0, c.SCREEN_HEIGHT ) );
     super( c.OBJECT_TYPE_ALIEN, p, randFloat( -.1, .1 ), new Vector( 0, 0 ), 7, c.SMALL_ALIEN_MASS );
 
     this.shape = new Shape( s );
-    this.cannon = 0;
+    this.cannon = false;
 
     const hLists =
     [
-      [ // randomly flys among a few new Points, stopping to shoot.
-        new Heuristic( "1", "1a", new HeuristicGotoRandom() ),
-        new Heuristic( "1a", "2", new HeuristicAttack( 100 ) ),
-        new Heuristic( "2", "2a", new HeuristicGotoRandom() ),
-        new Heuristic( "2a", "3", new HeuristicAttack( randFloat( 100, 300 ) ) ),
-        new Heuristic( "3", "3a", new HeuristicGotoRandom() ),
-        new Heuristic( "3a", "1", new HeuristicAttack( 100 ) ),
-      ],
-      [ // this one flys around forever and shoots at you
-        new Heuristic( "1", "1a", new HeuristicGoto( new Point( c.swh, c.shl ), c.OBJECT_DIST_MED ) ),
-        new Heuristic( "1a", "2", new HeuristicAttack( 100 ) ),
-        new Heuristic( "2", "2a", new HeuristicGoto( new Point( c.swl, c.shl ), c.OBJECT_DIST_MED ) ),
-        new Heuristic( "2a", "3", new HeuristicAttack( 100 ) ),
-        new Heuristic( "3", "3a", new HeuristicGoto( new Point( c.swh, c.shh ), c.OBJECT_DIST_MED ) ),
-        new Heuristic( "3a", "4", new HeuristicAttack( 100 ) ),
-        new Heuristic( "4", "4a", new HeuristicGoto( new Point( c.swl, c.shh ), c.OBJECT_DIST_MED ) ),
-        new Heuristic( "4a", "1", new HeuristicAttack( 100 ) ),
-      ],
-      [ // This one flys across this screen but shoots at you at a couple new Points.
-        new Heuristic( "1",  "2", new HeuristicGoto( new Point( c.swl, randFloat( c.shl, c.shh ) ), c.OBJECT_DIST_MED ) ),
-        new Heuristic( "2", "2a", new HeuristicGoto( new Point( c.SCREEN_WIDTH * .5, randFloat( c.shl, c.shh ) ), c.OBJECT_DIST_MED ) ),
-        new Heuristic( "2a", "3", new HeuristicAttack( 300 ) ),
-        new Heuristic( "3", "3a", new HeuristicGoto( new Point( c.swh, randFloat( c.shl, c.shh ) ), c.OBJECT_DIST_MED ) ),
-        new Heuristic( "3a", "4", new HeuristicAttack( 300 ) ),
-        new Heuristic( "4", undefined, new HeuristicGoto( new Point( c.SCREEN_WIDTH * 1.5, randFloat( 0, c.SCREEN_HEIGHT ) ), c.OBJECT_DIST_FAR ) )
+      [
+        new Heuristic( "1", "2", new HeuristicGoto( new Point( c.SCREEN_WIDTH * randFloat( .3, .7 ), c.SCREEN_HEIGHT * randFloat( .3, .7 ) ), c.OBJECT_DIST_MED ) ),
+        new Heuristic( "2", "3", new HeuristicStop( c.SPEED_SLOW ) ),
+        new Heuristic( "3", "4", new HeuristicAttack( 50 ) ),
+        new Heuristic( "4", "2", new HeuristicGotoRandom( c.OBJECT_DIST_MED ) ),
       ]
     ];
   
-    this.pilot = new Pilot( this, hLists[ randInt( 0, 2 ) ] );
+    this.pilot = new Pilot( this, hLists[ 0 ] );
   }
 
   update()
@@ -69,9 +49,9 @@ class SmallAlien extends WorldObject
       gManager.addObj( p );
     }
 
-    if( this.cannon > 0 )
+    if( this.cannon == true )
     {
-      this.cannon--;
+      this.cannon = false;
       let p = new CannonParticle( new Point( this.p.x + 10 * Math.cos( this.a ),
                                              this.p.y - 10 * Math.sin( this.a ) ),
                                   new Vector( 7, this.a ), 120, c.OBJECT_TYPE_AL_CANNON );
@@ -130,28 +110,22 @@ class BigAlien extends WorldObject
                 [ -10,-8,-10, 8, "black" ] ];
 
     let p = new Point( -c.SCREEN_BUFFER + 1, randFloat( 0, c.SCREEN_HEIGHT ) );
-    super( c.OBJECT_TYPE_ALIEN, p, randFloat( -.1, .1 ), new Vector( 0, 0), 12, c.BIG_ALIEN_MASS );
+    super( c.OBJECT_TYPE_ALIEN, p, randFloat( -.1, .1 ), new Vector( 0, 0 ), 12, c.BIG_ALIEN_MASS, c.SPEED_MED );
 
     this.shape = new Shape( s );
 
     const hLists = [
       [
-        new Heuristic( "i", "x", new HeuristicGoto( new Point( c.SCREEN_WIDTH * randFloat( .3, .7 ), randFloat( c.shl, c.shh ) ), c.OBJECT_DIST_NEAR ) ),
-        new Heuristic( "x", undefined, new HeuristicGoto( new Point( c.SCREEN_WIDTH * 1.1, randInt( -200, c.SCREEN_HEIGHT + 200 ) ), c.OBJECT_DIST_MED ) )
-      ],
-      [
-        new Heuristic( "i", "b", new HeuristicGoto( new Point( c.SCREEN_WIDTH / 4, randInt( c.shl, c.shh ) ), c.OBJECT_DIST_NEAR ) ),
-        new Heuristic( "b", "c", new HeuristicGoto( new Point( c.SCREEN_WIDTH / 2, randInt( c.SCREEN_HEIGHT * .1, c.SCREEN_HEIGHT * .9 ) ), c.OBJECT_DIST_MED ) ),
-        new Heuristic( "c", undefined, new HeuristicGoto( new Point( c.SCREEN_WIDTH * 1.5, randInt( c.shl, c.shh ) ), c.OBJECT_DIST_MED ) )
-      ],
-      [
-        new Heuristic( "f", "g", new HeuristicFace( randFloat( -.4, .4 ) ) ), // face right ish
-        new Heuristic( "g", "d", new HeuristicGo( c.SPEED_HI, randInt( 200, 700 ) ) ),
-        new Heuristic( "d", undefined, new HeuristicGoto( new Point( c.SCREEN_WIDTH * 1.2, randInt( 0, c.SCREEN_HEIGHT ), c.OBJECT_DIST_NEAR ) ) )
+        new Heuristic(  "1",  "2", new HeuristicGoto( new Point( c.SCREEN_WIDTH * randFloat( .2, .8 ), c.SCREEN_HEIGHT * randFloat( .2, .8 ) ), c.OBJECT_DIST_MED ) ),
+        new Heuristic(  "2",  "3", new HeuristicStop( c.SPEED_SLOW ) ),
+        new Heuristic(  "3", "3b", new HeuristicAttack( 50 ) ),
+        new Heuristic( "3b", "3c", new HeuristicAttack( 50 ) ),
+        new Heuristic( "3c",  "4", new HeuristicAttack( 50 ) ),
+        new Heuristic(  "4",  "2", new HeuristicGotoRandom( c.SCREEN_WIDTH / 4 ) ),
       ]
     ];
 
-    this.pilot = new Pilot( this, hLists[ randInt( 0, 2 ) ] );
+    this.pilot = new Pilot( this, hLists[ 0 ] );
   }
 
   update()
@@ -164,7 +138,15 @@ class BigAlien extends WorldObject
     if( this.accel > c.THRUST_LOW )
     {
       let p = new SmokeParticle( new Point( this.p.x, this.p.y ).move( new Vector( 8, this.a + c.PI ) ),
-                                  new Vector( 3, this.a + c.PI + randFloat( -.3, .3 ) ), randInt( 5, 12 ), this.accel * randInt( 15, 30 ) );
+                                 new Vector( 3, this.a + c.PI + randFloat( -.3, .3 ) ), randInt( 5, 12 ), this.accel * randInt( 15, 30 ) );
+      gManager.addObj( p );
+    }
+
+    if( this.cannon )
+    {
+      this.cannon = false;
+      let p = new CannonParticle( new Point( this.p.x + 10 * Math.cos( this.a ), this.p.y - 10 * Math.sin( this.a ) ),
+                                  new Vector( 7, this.a ), 120, c.OBJECT_TYPE_AL_CANNON );
       gManager.addObj( p );
     }
 
@@ -198,8 +180,7 @@ class BigAlien extends WorldObject
       {
         let p = new SmokeParticle(  new Point( this.p.x, this.p.y ).move( new Vector( 7, this.a + c.PI ) ),
                                     new Vector( 2, this.a + c.PI + randFloat( -.25, .25 ) ),
-                                    randFloat( 5, 10 ),
-                                    this.accel * randFloat( 15, 30 ) )
+                                    randFloat( 5, 10 ), this.accel * randFloat( 15, 30 ) )
         gManager.addObj( p );
       }
     }

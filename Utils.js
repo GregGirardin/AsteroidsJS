@@ -4,7 +4,7 @@ import { gManager } from './main.js';
 
 export class WorldObject
 {
-  constructor( type, p, a, v, colRadius, mass, weapon )
+  constructor( type, p, a, v, colRadius, mass, weapon, maxspeed=c.SPEED_VHI )
   {
     this.v = v;
     this.spin = 0;
@@ -16,6 +16,7 @@ export class WorldObject
     this.colRadius = colRadius;
     this.colList = []; // list (array) of CollisionObject
     this.mass = mass;
+    this.maxspeed = maxspeed;
   }
 
   offScreen()
@@ -37,6 +38,8 @@ export class WorldObject
 
     this.p.move( this.v );
     this.v.add( new Vector( this.accel, this.a ) );
+    if( this.v.magnitude > this.maxspeed )
+      this.v.magnitude = this.maxspeed;
   }
 }
 
@@ -107,7 +110,7 @@ export class spawnAble
     this.min = initparams[ 0 ]; // min time until next spawn
     this.max = initparams[ 1 ]; // max time
     this.num = initparams[ 2 ]; // how many spawning events in this level
-    this.count = initparams[ 3 ]; // countown until next spawning
+    this.count = initparams[ 3 ]; // count until first spawning
     this.newFunc = initparams[ 4 ]; // function to spawn the thing.
   }
 

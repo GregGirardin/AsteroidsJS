@@ -139,7 +139,7 @@ export class Ship extends WorldObject
           let p = new SmokeParticle( new Point( this.p.x, this.p.y ),
                                      new Vector( randFloat( 0, 2 ), c.TAU * randFloat( 0, 1 ) ).add( this.v ),
                                      randInt( 20, 50 ), randFloat( 3, 3.5 ) );
-           gManager.addObj( p );
+          gManager.addObj( p );
         }
         return false;
       }
