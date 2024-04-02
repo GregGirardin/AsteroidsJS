@@ -12,7 +12,7 @@ window.onload = gameInit;
 /* min time until next, max time, number of events, count to first spawn, constructor */
 let spawnParams = [ [ 5000,12000, -1, 2000, newBlackhole ], // -1 means can spawn forever but don't affect level complete
                     [ 1000, 2000, -1, 1200, newTanker ],
-                    [  150,  300,  0,  100, newAsteroid ],
+                    [  100,  300,  0,  100, newAsteroid ],
                     [  400, 1200,  0,  500, newBigAlien ],
                     [  200, 1200,  0, 1000, newSmallAlien ] ];
 
@@ -50,9 +50,9 @@ class gameManager
     this.wave = wave;
     this.waveComplete = false
 
-    spawnParams[ 2 ][ 2 ] = wave * 15;
-    spawnParams[ 3 ][ 2 ] = wave * 10;
-    spawnParams[ 4 ][ 2 ] = wave * 7;
+    spawnParams[ 2 ][ 2 ] = wave * 15; // Asteroids
+    spawnParams[ 3 ][ 2 ] = wave * 8; // big aliens
+    spawnParams[ 4 ][ 2 ] = wave * 5; // small aliens
 
     this.spawnList = new spawnList( spawnParams );
   }

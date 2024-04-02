@@ -207,6 +207,7 @@ export class HeuristicAttack
       this.ttNextAttack = 1;
       return true;
     }
+  
     if( this.attackState == c.ATTACK_INIT )
     {
       if( this.ttNextAttack == 0 )
@@ -242,7 +243,7 @@ export class HeuristicAttack
         this.ttNextAttack = randFloat( 20, 70 );
       }
       else
-        s.spin = aToGoal / 50;
+        s.spin = aToGoal / 20;
       }
     return false;
   }
