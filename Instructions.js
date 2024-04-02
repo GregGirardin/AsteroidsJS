@@ -1,4 +1,4 @@
-import { c } from './constants.js';
+import { c } from './Constants.js';
 import { Ship } from './Ship.js';
 import { Tanker } from './Tanker.js';
 import { BigAlien, SmallAlien } from './Aliens.js';
@@ -29,10 +29,10 @@ export class Instructions
       "Thrust: Up Arrow",
       "Stop: Down Arrow",
       "Turn: Left/Right Arrows",
-      "Gun: Space",
+      "Cannon: Space",
       "Torpedo: f",
-      "Help: ?",
       "New Game: N",
+      "Help / Pause: ?",
     ]
 
     this.displayString = 
@@ -43,7 +43,7 @@ export class Instructions
       "Big alien.",
       "Asteroid.",
       "Iron Asteroid, can't destroy.",
-      "Black hole."
+      "Black hole, avoid."
     ];
 
     for( let index = 0;index < this.displayObjects.length;index++ )

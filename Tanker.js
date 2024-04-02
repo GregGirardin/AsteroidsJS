@@ -1,5 +1,4 @@
-
-import { c } from './constants.js';
+import { c } from './Constants.js';
 import { Point, Vector } from './Vector.js';
 import { Heuristic, HeuristicFace, HeuristicGo, HeuristicStop, HeuristicWait, HeuristicGoto } from './Pilot.js';
 import { WorldObject, angleTo, randInt, randFloat } from './Utils.js';

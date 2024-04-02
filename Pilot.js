@@ -1,4 +1,4 @@
-import { c } from './constants.js';
+import { c } from './Constants.js';
 import { angleTo, angleNorm, randInt, randFloat } from './Utils.js';
 import { Point, Vector, dir, vectorDiff } from './Vector.js';
 import { gManager } from './main.js';

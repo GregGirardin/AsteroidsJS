@@ -1,4 +1,4 @@
-import { c } from './constants.js';
+import { c } from './Constants.js';
 import { Ship } from './Ship.js';
 import { Vector } from './Vector.js';
 import { newTanker } from './Tanker.js';
@@ -10,11 +10,11 @@ import { Instructions } from './Instructions.js';
 export let gManager; // a single global instance. Everything uses this.
 window.onload = gameInit;
 /* min time until next, max time, number of events, count to first spawn, constructor */
-let spawnParams = [ [ 2000, 5000, -1, 2000, newBlackhole ], // -1 means can spawn forever but don't affect level complete
+let spawnParams = [ [ 5000,12000, -1, 2000, newBlackhole ], // -1 means can spawn forever but don't affect level complete
                     [ 1000, 2000, -1, 1200, newTanker ],
                     [  150,  300,  0,  100, newAsteroid ],
-                    [  400,  800,  0,  500, newBigAlien ],
-                    [  200,  800,  0, 1000, newSmallAlien ] ];
+                    [  400, 1200,  0,  500, newBigAlien ],
+                    [  200, 1200,  0, 1000, newSmallAlien ] ];
 
 class gameManager
 {
@@ -139,6 +139,16 @@ class gameManager
     }
   }
 
+  keyUpHandler( param )
+  {
+    switch( param.key )
+    {
+      case " ":
+        this.ship.fireCannon = false;
+        break;
+    }
+  }
+
   update ( deltaMs )
   {
     var obj;
@@ -160,9 +170,9 @@ class gameManager
             let spd = obj2.v.dot( dir ) + obj1.v.dot( dir + c.PI ); // velocity towards each other.
             if( spd > 0 )  // make sure they're moving toward each other
             {
-              let co = new CollisionObject( obj2, new Vector( spd * obj2.mass / obj1.mass, dir ), adjJust );
+              let co = new CollisionObject( obj2, new Vector( spd * obj2.mass / 100, dir ), adjJust );
               obj1.colList.push( co );
-              co = new CollisionObject( obj1, new Vector( spd * obj1.mass / obj2.mass, dir - c.PI ), adjJust );
+              co = new CollisionObject( obj1, new Vector( spd * obj1.mass / 100, dir - c.PI ), adjJust );
               obj2.colList.push( co );
             }
           }
@@ -270,12 +280,14 @@ function gameLoop( timeStamp )
 }
 
 function keyDownHandler( e ) { gManager.keyDownHandler( e ); }
+function keyUpHandler( e ) { gManager.keyUpHandler( e ); }
 
 function gameInit()
 {
   gManager = new gameManager();
 
   document.addEventListener( "keydown", keyDownHandler, false );
+  document.addEventListener( "keyup", keyUpHandler, false );
 
   window.requestAnimationFrame( gameLoop );
 }

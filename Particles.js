@@ -1,4 +1,4 @@
-import { c } from './constants.js';
+import { c } from './Constants.js';
 import { WorldObject, randInt, randFloat } from './Utils.js';
 import { Shape } from './Shape.js';
 import { Point, Vector } from './Vector.js';

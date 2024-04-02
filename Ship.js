@@ -1,4 +1,4 @@
-import { c } from './constants.js';
+import { c } from './Constants.js';
 import { WorldObject } from './Utils.js';
 import { Shape } from './Shape.js';
 import { randInt, randFloat } from './Utils.js';
@@ -22,6 +22,7 @@ export class Ship extends WorldObject
     this.torpedos = c.SHIP_MAX_TORPEDOS;
     this.fuel = c.SHIP_MAX_FUEL;
     this.torpedoDelay = 0;
+    this.cannonTimer = 0; // how fast to shoot canon if space is held down
   }
 
   update()
@@ -61,13 +62,15 @@ export class Ship extends WorldObject
       gManager.addObj( p );
     }
 
-    if( this.fireCannon == true && this.rounds > 0 )
+    if( this.cannonTimer > 0 )
+      this.cannonTimer--;
+    else if( this.fireCannon == true && this.rounds > 0 )
     {
       let p = new CannonParticle( new Point( this.p.x + 10 * Math.cos( this.a ), this.p.y - 10 * Math.sin( this.a ) ),
                                   new Vector( 7, this.a ).add( this.v, true ), 120 );
       gManager.addObj( p );
-      this.fireCannon = false;
       this.rounds -= .5;
+      this.cannonTimer = c.SHIP_CANON_TIMER;
       if( gManager.score > c.CANNON_COST )
       gManager.score -= c.CANNON_COST;
     }

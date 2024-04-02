@@ -1,4 +1,4 @@
-import { Point } from './vector.js';
+import { Point } from './Vector.js';
 import { gManager } from './main.js';
 
 // a line is two verticies and a color

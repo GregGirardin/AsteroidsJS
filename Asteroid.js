@@ -1,4 +1,4 @@
-import { c } from './constants.js';
+import { c } from './Constants.js';
 import { WorldObject, randInt, randFloat } from './Utils.js';
 import { Shape } from './Shape.js';
 import { Vector, Point } from './Vector.js';
@@ -73,7 +73,7 @@ export class Asteroid extends( WorldObject )
         continue;
   
       if( ( this.iron == true || 
-          ( colObj.i.magnitude < colObj.SMALL_IMPULSE && colObj.o.weapon == false ) ) && colObj.o.type != c.OBJECT_TYPE_BH ) 
+          ( colObj.i.magnitude < c.SMALL_IMPULSE && colObj.o.weapon == false ) ) && colObj.o.type != c.OBJECT_TYPE_BH ) 
       {
         this.v.add( colObj.i, true );
         if( this.v.magnitide > c.SPEED_HI )
